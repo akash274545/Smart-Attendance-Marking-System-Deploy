@@ -120,18 +120,25 @@
                                             <label for="selectedSubjectId" class="form-label">
                                                 <i class="fas fa-book me-2"></i>Select Subject
                                             </label>
-                                            <select class="form-control" id="selectedSubjectId" name="selectedSubjectId">
-                                                <option value="">-- Select a Subject (Optional) --</option>
-                                                <option th:each="defaultSubject : ${defaultSubjects}" 
-                                                        th:value="${defaultSubject.id}"
-                                                        th:data-name="${defaultSubject.subjectName}"
-                                                        th:data-code="${defaultSubject.subjectCode}"
-                                                        th:data-description="${defaultSubject.description}"
-                                                        th:text="${defaultSubject.subjectName + ' (' + defaultSubject.subjectCode + ')'}">
-                                                </option>
+                                            <select class="form-control" id="selectedSubjectId" name="selectedSubjectId" disabled>
+                                                <option value="">-- Select a class first --</option>
                                             </select>
-                                            <div class="form-text">Select from default subjects or enter manually below</div>
+                                            <div class="form-text">Subjects will load based on the selected class</div>
                                         </div>
+
+                                        <!-- Hidden: all subjects data for JS filtering -->
+                                        <script th:inline="javascript">
+                                            var allSubjectsData = [];
+                                            /*[# th:each="s : ${allSubjects}"]*/
+                                            allSubjectsData.push({
+                                                id: /*[(${s.id})]*/ '',
+                                                name: /*[(${s.subjectName})]*/ '',
+                                                code: /*[(${s.subjectCode})]*/ '',
+                                                description: /*[(${s.description ?: ''})]*/ '',
+                                                classId: /*[(${s.classId ?: ''})]*/ ''
+                                            });
+                                            /*[/]*/
+                                        </script>
                                         
                                         <div class="mb-3">
                                             <label for="subjectName" class="form-label">
@@ -188,35 +195,60 @@
             return subjectNameRegex.test(subjectName);
         }
 
-        // Auto-populate subject fields when default subject is selected
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('addSubjectForm');
+            const classSelect = document.getElementById('classId');
             const subjectSelect = document.getElementById('selectedSubjectId');
             const subjectNameInput = document.getElementById('subjectName');
             const subjectCodeInput = document.getElementById('subjectCode');
             const descriptionInput = document.getElementById('description');
             const subjectNameError = document.getElementById('subjectNameError');
-            
-            // Get all default subject options with their data
-            const subjectOptions = {};
-            document.querySelectorAll('#selectedSubjectId option').forEach(option => {
-                if (option.value) {
-                    subjectOptions[option.value] = {
-                        name: option.textContent.split(' (')[0],
-                        code: option.getAttribute('data-code'),
-                        description: option.getAttribute('data-description') || ''
-                    };
+
+            // Filter subject dropdown when class changes
+            classSelect.addEventListener('change', function() {
+                const selectedClassId = this.value;
+                subjectSelect.innerHTML = '';
+
+                if (!selectedClassId) {
+                    subjectSelect.disabled = true;
+                    subjectSelect.innerHTML = '<option value="">-- Select a class first --</option>';
+                    return;
                 }
+
+                const filtered = allSubjectsData.filter(function(s) {
+                    return s.classId === selectedClassId;
+                });
+
+                if (filtered.length === 0) {
+                    subjectSelect.innerHTML = '<option value="">-- No subjects for this class yet --</option>';
+                    subjectSelect.disabled = true;
+                } else {
+                    subjectSelect.innerHTML = '<option value="">-- Select a subject (optional) --</option>';
+                    filtered.forEach(function(s) {
+                        var opt = document.createElement('option');
+                        opt.value = s.id;
+                        opt.textContent = s.name + ' (' + s.code + ')';
+                        opt.dataset.name = s.name;
+                        opt.dataset.code = s.code;
+                        opt.dataset.description = s.description;
+                        subjectSelect.appendChild(opt);
+                    });
+                    subjectSelect.disabled = false;
+                }
+
+                // Clear auto-filled fields when class changes
+                subjectNameInput.value = '';
+                subjectCodeInput.value = '';
+                descriptionInput.value = '';
             });
-            
-            // Handle subject selection change
+
+            // Auto-fill fields when a subject is selected
             subjectSelect.addEventListener('change', function() {
-                const selectedSubjectId = this.value;
-                if (selectedSubjectId && subjectOptions[selectedSubjectId]) {
-                    const selectedSubject = subjectOptions[selectedSubjectId];
-                    subjectNameInput.value = selectedSubject.name;
-                    subjectCodeInput.value = selectedSubject.code;
-                    descriptionInput.value = selectedSubject.description;
+                const selected = this.options[this.selectedIndex];
+                if (selected && selected.value) {
+                    subjectNameInput.value = selected.dataset.name || '';
+                    subjectCodeInput.value = selected.dataset.code || '';
+                    descriptionInput.value = selected.dataset.description || '';
                 }
             });
 

@@ -357,7 +357,8 @@
                                             <label for="fullName" class="form-label">
                                                 <i class="fas fa-id-card me-2"></i>Full Name
                                             </label>
-                                            <input type="text" class="form-control" id="fullName" name="fullName" required>
+                                            <input type="text" class="form-control" id="fullName" name="fullName" maxlength="50" placeholder="First Last" required>
+                                            <div class="invalid-feedback" id="fullNameError"></div>
                                         </div>
                                         
                                         <div class="mb-3">
@@ -421,12 +422,37 @@
         }
 
         // Setup validation for add teacher form
+        function validateFullName(val) {
+            const trimmed = val.trim();
+            const words = trimmed.split(/\s+/);
+            return (
+                trimmed.length >= 3 &&
+                trimmed.length <= 50 &&
+                /^[a-zA-Z\s]+$/.test(trimmed) &&
+                words.length >= 2 &&
+                words.every(function(w) { return w.length > 0; })
+            );
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('addTeacherForm');
+            const fullNameInput = document.getElementById('fullName');
+            const fullNameError = document.getElementById('fullNameError');
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
             const usernameError = document.getElementById('usernameError');
             const passwordError = document.getElementById('passwordError');
+
+            fullNameInput.addEventListener('input', function() {
+                const value = this.value;
+                if (value && !validateFullName(value)) {
+                    this.classList.add('is-invalid');
+                    fullNameError.textContent = 'Full name must be letters only, at least 2 words, max 50 characters (e.g. John Smith).';
+                } else {
+                    this.classList.remove('is-invalid');
+                    fullNameError.textContent = '';
+                }
+            });
 
             // Username validation
             usernameInput.addEventListener('input', function() {
@@ -454,6 +480,12 @@
 
             // Form submission validation
             form.addEventListener('submit', function(e) {
+                if (!validateFullName(fullNameInput.value)) {
+                    e.preventDefault();
+                    fullNameInput.classList.add('is-invalid');
+                    fullNameError.textContent = 'Full name must be letters only, at least 2 words, max 50 characters (e.g. John Smith).';
+                }
+
                 const usernameValid = validateUsername(usernameInput.value.trim());
                 const passwordValid = validatePassword(passwordInput.value);
 

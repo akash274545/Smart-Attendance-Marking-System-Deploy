@@ -84,6 +84,7 @@ public class TeacherController {
         model.addAttribute("teacher", teacher);
         model.addAttribute("classes", classService.findAllClasses());
         model.addAttribute("defaultSubjects", subjectService.findAllDefaultSubjects());
+        model.addAttribute("allSubjects", subjectService.findAllSubjects());
         return "teacher/add-subject";
     }
     

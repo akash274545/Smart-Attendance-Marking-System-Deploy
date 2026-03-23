@@ -932,7 +932,8 @@
                         <input type="hidden" id="editTeacherId" name="id">
                         <div class="mb-3">
                             <label class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="editTeacherName" name="fullName" required>
+                            <input type="text" class="form-control" id="editTeacherName" name="fullName" maxlength="50" placeholder="First Last" required>
+                            <div class="invalid-feedback" id="editTeacherNameError"></div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Username</label>
@@ -1010,7 +1011,8 @@
                         <input type="hidden" id="editStudentId" name="id">
                         <div class="mb-3">
                             <label class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="editStudentName" name="fullName" required>
+                            <input type="text" class="form-control" id="editStudentName" name="fullName" maxlength="50" placeholder="First Last" required>
+                            <div class="invalid-feedback" id="editStudentNameError"></div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Username</label>
@@ -1417,6 +1419,49 @@
             document.getElementById('deleteSubjectForm').action = '/admin/delete-subject';
             new bootstrap.Modal(document.getElementById('deleteSubjectModal')).show();
         }
+
+        // Full name validation helper
+        function validateFullName(val) {
+            const trimmed = val.trim();
+            const words = trimmed.split(/\s+/);
+            return (
+                trimmed.length >= 3 &&
+                trimmed.length <= 50 &&
+                /^[a-zA-Z\s]+$/.test(trimmed) &&
+                words.length >= 2 &&
+                words.every(function(w) { return w.length > 0; })
+            );
+        }
+
+        function attachFullNameValidation(inputId, errorId, formId) {
+            const input = document.getElementById(inputId);
+            const error = document.getElementById(errorId);
+            const form = document.getElementById(formId);
+            const msg = 'Full name must be letters only, at least 2 words, max 50 characters (e.g. John Smith).';
+
+            input.addEventListener('input', function() {
+                if (this.value && !validateFullName(this.value)) {
+                    this.classList.add('is-invalid');
+                    error.textContent = msg;
+                } else {
+                    this.classList.remove('is-invalid');
+                    error.textContent = '';
+                }
+            });
+
+            form.addEventListener('submit', function(e) {
+                if (!validateFullName(input.value)) {
+                    e.preventDefault();
+                    input.classList.add('is-invalid');
+                    error.textContent = msg;
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            attachFullNameValidation('editTeacherName', 'editTeacherNameError', 'editTeacherForm');
+            attachFullNameValidation('editStudentName', 'editStudentNameError', 'editStudentForm');
+        });
     </script>
 </body>
 </html>

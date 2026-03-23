@@ -603,6 +603,8 @@
                     class="form-control"
                     id="fullName"
                     name="fullName"
+                    maxlength="50"
+                    placeholder="First Last"
                     required
                   />
                   <div class="invalid-feedback" id="fullNameError"></div>
@@ -698,9 +700,12 @@
       // ✅ NEW: Full name validation
       function validateFullName(fullName) {
         const nameRegex = /^[a-zA-Z\s]+$/;
-        const words = fullName.trim().split(/\s+/);
+        const trimmed = fullName.trim();
+        const words = trimmed.split(/\s+/);
         return (
-          nameRegex.test(fullName) &&
+          trimmed.length >= 3 &&
+          trimmed.length <= 50 &&
+          nameRegex.test(trimmed) &&
           words.length >= 2 &&
           words.every((w) => w.length > 0)
         );
@@ -754,7 +759,7 @@
           if (value && !validateFullName(value)) {
             this.classList.add("is-invalid");
             fullNameError.textContent =
-              "Full name must contain only letters and at least two words (e.g. John Smith).";
+              "Full name must be letters only, at least 2 words, max 50 characters (e.g. John Smith).";
           } else {
             this.classList.remove("is-invalid");
             fullNameError.textContent = "";
@@ -792,7 +797,7 @@
             valid = false;
             fullNameInput.classList.add("is-invalid");
             fullNameError.textContent =
-              "Full name must contain only letters and at least two words (e.g. John Smith).";
+              "Full name must be letters only, at least 2 words, max 50 characters (e.g. John Smith).";
           }
 
           if (!validatePassword(passwordInput.value)) {
