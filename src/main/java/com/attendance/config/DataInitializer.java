@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -72,6 +73,16 @@ public class DataInitializer implements CommandLineRunner {
             System.err.println("ERROR initializing default subjects: " + e.getMessage());
             e.printStackTrace();
         }
+
+        // Initialize class-specific subjects
+        System.out.println("Initializing class-specific subjects...");
+        try {
+            initializeClassSubjects();
+            System.out.println("Class-specific subjects initialized successfully!");
+        } catch (Exception e) {
+            System.err.println("ERROR initializing class subjects: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     private void initializeDefaultClasses() {
@@ -121,6 +132,96 @@ public class DataInitializer implements CommandLineRunner {
                 subjectService.saveDefaultSubject(subject);
                 System.out.println("Created default subject: " + subject.getSubjectName() + " (" + subject.getSubjectCode() + ")");
             }
+        }
+    }
+
+    private void initializeClassSubjects() {
+        // Map of classCode -> list of {name, code, description}
+        Map<String, List<String[]>> classSubjects = new java.util.LinkedHashMap<>();
+
+        classSubjects.put("FY", Arrays.asList(
+            new String[]{"Mathematics",          "MATH-FY",   "Basic Mathematics for First Year"},
+            new String[]{"Physics",              "PHY-FY",    "Fundamentals of Physics"},
+            new String[]{"Chemistry",            "CHEM-FY",   "Basic Chemistry"},
+            new String[]{"English",              "ENG-FY",    "English Language and Communication"},
+            new String[]{"Programming",          "PROG-FY",   "Introduction to Programming"}
+        ));
+
+        classSubjects.put("SY", Arrays.asList(
+            new String[]{"Data Structures",      "DS-SY",     "Data Structures and Algorithms"},
+            new String[]{"Database Management",  "DBMS-SY",   "Database Systems and SQL"},
+            new String[]{"Computer Networks",    "CN-SY",     "Networking Fundamentals"},
+            new String[]{"Operating Systems",    "OS-SY",     "OS Concepts and Design"},
+            new String[]{"Mathematics",          "MATH-SY",   "Discrete Mathematics"}
+        ));
+
+        classSubjects.put("TY", Arrays.asList(
+            new String[]{"Software Engineering", "SE-TY",     "Software Development Lifecycle"},
+            new String[]{"Artificial Intelligence","AI-TY",   "Introduction to AI"},
+            new String[]{"Machine Learning",     "ML-TY",     "ML Algorithms and Applications"},
+            new String[]{"Web Development",      "WEB-TY",    "Full Stack Web Development"},
+            new String[]{"Computer Graphics",    "CG-TY",     "2D and 3D Graphics"}
+        ));
+
+        classSubjects.put("FOURTH", Arrays.asList(
+            new String[]{"Project Management",   "PM-FOURTH", "Software Project Management"},
+            new String[]{"Cloud Computing",      "CLOUD-FOURTH","Cloud Platforms and Services"},
+            new String[]{"Cybersecurity",        "SEC-FOURTH","Network and Information Security"},
+            new String[]{"Big Data",             "BD-FOURTH", "Big Data Analytics"},
+            new String[]{"IoT",                  "IOT-FOURTH","Internet of Things"}
+        ));
+
+        classSubjects.put("MFY", Arrays.asList(
+            new String[]{"Research Methods",     "RM-MFY",    "Research Methodology"},
+            new String[]{"Advanced Algorithms",  "AA-MFY",    "Advanced Algorithm Design"},
+            new String[]{"Advanced DBMS",        "ADBMS-MFY", "Advanced Database Systems"},
+            new String[]{"Machine Learning",     "ML-MFY",    "Advanced Machine Learning"}
+        ));
+
+        classSubjects.put("MSY", Arrays.asList(
+            new String[]{"Thesis",               "THESIS-MSY","Master Thesis Work"},
+            new String[]{"Advanced AI",          "AAI-MSY",   "Advanced Artificial Intelligence"},
+            new String[]{"Distributed Systems",  "DIST-MSY",  "Distributed Computing Systems"}
+        ));
+
+        classSubjects.put("PHD", Arrays.asList(
+            new String[]{"Research Methodology", "RMET-PHD",  "Advanced Research Methodology"},
+            new String[]{"Advanced Topics",      "AT-PHD",    "Advanced Topics in CS"}
+        ));
+
+        classSubjects.put("DIP", Arrays.asList(
+            new String[]{"Technical Drawing",    "TD-DIP",    "Engineering Technical Drawing"},
+            new String[]{"Workshop Practice",    "WP-DIP",    "Hands-on Workshop Training"},
+            new String[]{"Applied Mathematics",  "AM-DIP",    "Mathematics for Diploma"}
+        ));
+
+        classSubjects.put("CERT", Arrays.asList(
+            new String[]{"Fundamentals",         "FUND-CERT", "Core Fundamentals"},
+            new String[]{"Practical Training",   "PT-CERT",   "Hands-on Practical Training"}
+        ));
+
+        classSubjects.put("FOUND", Arrays.asList(
+            new String[]{"Basic Mathematics",    "BM-FOUND",  "Foundation Mathematics"},
+            new String[]{"Basic Science",        "BS-FOUND",  "Foundation Science"},
+            new String[]{"Communication Skills", "COMM-FOUND","English Communication Skills"}
+        ));
+
+        for (Map.Entry<String, List<String[]>> entry : classSubjects.entrySet()) {
+            String classCode = entry.getKey();
+            classService.findByClassCode(classCode).ifPresent(classEntity -> {
+                String classId = classEntity.getId();
+                for (String[] s : entry.getValue()) {
+                    if (!subjectService.existsBySubjectCode(s[1])) {
+                        Subject subject = new Subject();
+                        subject.setSubjectName(s[0]);
+                        subject.setSubjectCode(s[1]);
+                        subject.setDescription(s[2]);
+                        subject.setClassId(classId);
+                        subjectService.saveSubject(subject);
+                        System.out.println("Created subject: " + s[0] + " (" + s[1] + ") for class " + classCode);
+                    }
+                }
+            });
         }
     }
 }
