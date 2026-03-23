@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Attendance Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background Shapes */
+        .bg-shape {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.15;
+            animation: float 25s infinite ease-in-out;
+            z-index: 0;
+        }
+
+        .bg-shape-1 {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            top: -250px;
+            left: -250px;
+            animation-delay: 0s;
+        }
+
+        .bg-shape-2 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            bottom: -200px;
+            right: -200px;
+            animation-delay: 8s;
+        }
+
+        .bg-shape-3 {
+            width: 350px;
+            height: 350px;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            top: 50%;
+            right: -150px;
+            animation-delay: 16s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(60px, -60px) scale(1.1);
+            }
+            50% {
+                transform: translate(-40px, 40px) scale(0.9);
+            }
+            75% {
+                transform: translate(40px, 60px) scale(1.05);
+            }
+        }
+
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: sidebarGradient 10s ease infinite;
+            min-height: 100vh;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        @keyframes sidebarGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .sidebar .p-3 h4 {
+            animation: fadeInLeft 0.6s ease-out;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.9);
+            padding: 14px 20px;
+            border-radius: 12px;
+            margin: 6px 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInLeft 0.6s ease-out backwards;
+        }
+
+        .sidebar .nav-link:nth-child(1) { animation-delay: 0.1s; }
+        .sidebar .nav-link:nth-child(2) { animation-delay: 0.2s; }
+        .sidebar .nav-link:nth-child(3) { animation-delay: 0.3s; }
+        .sidebar .nav-link:nth-child(4) { animation-delay: 0.4s; }
+        .sidebar .nav-link:nth-child(5) { animation-delay: 0.5s; }
+
+        .sidebar .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: left 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover::before,
+        .sidebar .nav-link.active::before {
+            left: 0;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .sidebar .nav-link i {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover i {
+            transform: scale(1.2);
+        }
+
+        .table {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.6s ease-out;
+            background: white;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: tableHeaderGradient 8s ease infinite;
+            color: white;
+        }
+
+        @keyframes tableHeaderGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .filter-section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            animation: fadeInUp 0.6s ease-out 0.2s backwards;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: buttonGradient 5s ease infinite;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        @keyframes buttonGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-outline-secondary {
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-sm {
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-sm:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .tab-content {
+            padding: 1.5rem 0;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .nav-tabs {
+            border-bottom: 3px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 12px 12px 0 0;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: modalHeaderGradient 8s ease infinite;
+            color: white;
+            border-radius: 0;
+        }
+
+        @keyframes modalHeaderGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.3rem rgba(102, 126, 234, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+            animation: slideDown 0.5s ease-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            animation: fadeInLeft 0.6s ease-out;
+            color: #495057;
+        }
+
+        .badge {
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background Shapes -->
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+    <div class="bg-shape bg-shape-3"></div>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <div class="p-3">
+                        <h4><i class="fas fa-graduation-cap me-2"></i>Admin Panel</h4>
+                        <hr>
+                    </div>
+                    <nav class="nav flex-column px-3">
+                        <a class="nav-link active" href="/admin/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                        <a class="nav-link" href="/admin/add-teacher">
+                            <i class="fas fa-user-plus me-2"></i>Add Teacher
+                        </a>
+                        <a class="nav-link" href="/admin/add-class">
+                            <i class="fas fa-school me-2"></i>Add Class
+                        </a>
+                        <hr>
+                        <a class="nav-link" href="/change-password">
+                            <i class="fas fa-key me-2"></i>Change Password
+                        </a>
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-database me-2"></i>Dashboard</h2>
+                        <span class="text-muted">Complete System Data Management</span>
+                    </div>
+                    
+                    <!-- Flash Messages -->
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span th:text="${success}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs" id="masterTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="teachers-tab" data-bs-toggle="tab" data-bs-target="#teachers" type="button" role="tab">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>Teachers
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab">
+                                <i class="fas fa-user-graduate me-2"></i>Students
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="classes-tab" data-bs-toggle="tab" data-bs-target="#classes" type="button" role="tab">
+                                <i class="fas fa-school me-2"></i>Classes
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="subjects-tab" data-bs-toggle="tab" data-bs-target="#subjects" type="button" role="tab">
+                                <i class="fas fa-book me-2"></i>Subjects
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
+                                <i class="fas fa-chart-bar me-2"></i>Analytics
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="masterTabContent">
+                        <!-- Teachers Tab -->
+                        <div class="tab-pane fade show active" id="teachers" role="tabpanel">
+                            <div class="filter-section">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="teacherSearch" placeholder="Search by name, username, or email...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary w-100" onclick="filterTeachers()">
+                                            <i class="fas fa-search me-2"></i>Filter
+                                        </button>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-outline-secondary w-100" onclick="resetTeacherFilter()">
+                                            <i class="fas fa-redo me-2"></i>Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="teachersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="teacher : ${teachers}">
+                                            <td th:text="${teacher.id}">1</td>
+                                            <td th:text="${teacher.fullName}">John Doe</td>
+                                            <td th:text="${teacher.username}">johndoe</td>
+                                            <td th:text="${teacher.email}">john@example.com</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info" 
+                                                        th:data-id="${teacher.id}"
+                                                        th:data-name="${teacher.fullName}"
+                                                        th:data-username="${teacher.username}"
+                                                        th:data-email="${teacher.email}"
+                                                        onclick="viewTeacherFromButton(this)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-warning"
+                                                        th:data-id="${teacher.id}"
+                                                        th:data-name="${teacher.fullName}"
+                                                        th:data-username="${teacher.username}"
+                                                        th:data-email="${teacher.email}"
+                                                        onclick="editTeacherFromButton(this)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger"
+                                                        th:data-id="${teacher.id}"
+                                                        th:data-name="${teacher.fullName}"
+                                                        onclick="deleteTeacherFromButton(this)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Students Tab -->
+                        <div class="tab-pane fade" id="students" role="tabpanel">
+                            <div class="filter-section">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="studentSearch" placeholder="Search by name, username, or email...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select class="form-control" id="studentStatusFilter">
+                                            <option value="">All Status</option>
+                                            <option value="approved">Approved</option>
+                                            <option value="pending">Pending</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary w-100" onclick="filterStudents()">
+                                            <i class="fas fa-search me-2"></i>Filter
+                                        </button>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-outline-secondary w-100" onclick="resetStudentFilter()">
+                                            <i class="fas fa-redo me-2"></i>Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="studentsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="student : ${students}">
+                                            <td th:text="${student.id}">1</td>
+                                            <td th:text="${student.fullName}">John Doe</td>
+                                            <td th:text="${student.username}">johndoe</td>
+                                            <td th:text="${student.email}">john@example.com</td>
+                                            <td>
+                                                <span class="badge bg-success">Approved</span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info"
+                                                        th:data-id="${student.id}"
+                                                        th:data-name="${student.fullName}"
+                                                        th:data-username="${student.username}"
+                                                        th:data-email="${student.email}"
+                                                        onclick="viewStudentFromButton(this)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-warning"
+                                                        th:data-id="${student.id}"
+                                                        th:data-name="${student.fullName}"
+                                                        th:data-username="${student.username}"
+                                                        th:data-email="${student.email}"
+                                                        onclick="editStudentFromButton(this)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger"
+                                                        th:data-id="${student.id}"
+                                                        th:data-name="${student.fullName}"
+                                                        onclick="deleteStudentFromButton(this)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr th:each="pendingStudent : ${pendingStudents}">
+                                            <td th:text="${pendingStudent.id}">1</td>
+                                            <td th:text="${pendingStudent.fullName}">John Doe</td>
+                                            <td th:text="${pendingStudent.username}">johndoe</td>
+                                            <td th:text="${pendingStudent.email}">john@example.com</td>
+                                            <td>
+                                                <span class="badge bg-warning">Pending</span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info"
+                                                        th:data-id="${pendingStudent.id}"
+                                                        th:data-name="${pendingStudent.fullName}"
+                                                        th:data-username="${pendingStudent.username}"
+                                                        th:data-email="${pendingStudent.email}"
+                                                        onclick="viewStudentFromButton(this)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-warning"
+                                                        th:data-id="${pendingStudent.id}"
+                                                        th:data-name="${pendingStudent.fullName}"
+                                                        th:data-username="${pendingStudent.username}"
+                                                        th:data-email="${pendingStudent.email}"
+                                                        onclick="editStudentFromButton(this)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger"
+                                                        th:data-id="${pendingStudent.id}"
+                                                        th:data-name="${pendingStudent.fullName}"
+                                                        onclick="deleteStudentFromButton(this)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Classes Tab -->
+                        <div class="tab-pane fade" id="classes" role="tabpanel">
+                            <div class="filter-section">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="classSearch" placeholder="Search by name or code...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary w-100" onclick="filterClasses()">
+                                            <i class="fas fa-search me-2"></i>Filter
+                                        </button>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-outline-secondary w-100" onclick="resetClassFilter()">
+                                            <i class="fas fa-redo me-2"></i>Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="classesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Class Name</th>
+                                            <th>Class Code</th>
+                                            <th>Description</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="classItem : ${classes}">
+                                            <td th:text="${classItem.id}">1</td>
+                                            <td th:text="${classItem.className}">First Year</td>
+                                            <td th:text="${classItem.classCode}">FY</td>
+                                            <td th:text="${classItem.description}">Description</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info"
+                                                        th:data-id="${classItem.id}"
+                                                        th:data-name="${classItem.className}"
+                                                        th:data-code="${classItem.classCode}"
+                                                        th:data-description="${classItem.description}"
+                                                        onclick="viewClassFromButton(this)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-warning"
+                                                        th:data-id="${classItem.id}"
+                                                        th:data-name="${classItem.className}"
+                                                        th:data-code="${classItem.classCode}"
+                                                        th:data-description="${classItem.description}"
+                                                        onclick="editClassFromButton(this)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger"
+                                                        th:data-id="${classItem.id}"
+                                                        th:data-name="${classItem.className}"
+                                                        onclick="deleteClassFromButton(this)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Subjects Tab -->
+                        <div class="tab-pane fade" id="subjects" role="tabpanel">
+                            <div class="filter-section">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="subjectSearch" placeholder="Search by name or code...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary w-100" onclick="filterSubjects()">
+                                            <i class="fas fa-search me-2"></i>Filter
+                                        </button>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-outline-secondary w-100" onclick="resetSubjectFilter()">
+                                            <i class="fas fa-redo me-2"></i>Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="subjectsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Subject Name</th>
+                                            <th>Subject Code</th>
+                                            <th>Description</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="subject : ${subjects}">
+                                            <td th:text="${subject.id}">1</td>
+                                            <td th:text="${subject.subjectName}">Mathematics</td>
+                                            <td th:text="${subject.subjectCode}">MATH101</td>
+                                            <td th:text="${subject.description}">Description</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info"
+                                                        th:data-id="${subject.id}"
+                                                        th:data-name="${subject.subjectName}"
+                                                        th:data-code="${subject.subjectCode}"
+                                                        th:data-description="${subject.description}"
+                                                        onclick="viewSubjectFromButton(this)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-warning"
+                                                        th:data-id="${subject.id}"
+                                                        th:data-name="${subject.subjectName}"
+                                                        th:data-code="${subject.subjectCode}"
+                                                        th:data-description="${subject.description}"
+                                                        onclick="editSubjectFromButton(this)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger"
+                                                        th:data-id="${subject.id}"
+                                                        th:data-name="${subject.subjectName}"
+                                                        onclick="deleteSubjectFromButton(this)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Tab -->
+                        <div class="tab-pane fade" id="analytics" role="tabpanel">
+                            <div class="row mt-4 g-4">
+                                <!-- User Distribution Doughnut -->
+                                <div class="col-md-6">
+                                    <div class="card p-4" style="border-radius:15px;">
+                                        <h5 class="mb-3"><i class="fas fa-users me-2 text-primary"></i>User Distribution</h5>
+                                        <canvas id="userDistributionChart" height="260"></canvas>
+                                    </div>
+                                </div>
+                                <!-- System Overview Bar -->
+                                <div class="col-md-6">
+                                    <div class="card p-4" style="border-radius:15px;">
+                                        <h5 class="mb-3"><i class="fas fa-chart-bar me-2 text-primary"></i>System Overview</h5>
+                                        <canvas id="systemOverviewChart" height="260"></canvas>
+                                    </div>
+                                </div>
+                                <!-- Students Status Doughnut -->
+                                <div class="col-md-6">
+                                    <div class="card p-4" style="border-radius:15px;">
+                                        <h5 class="mb-3"><i class="fas fa-user-graduate me-2 text-primary"></i>Student Approval Status</h5>
+                                        <canvas id="studentStatusChart" height="260"></canvas>
+                                    </div>
+                                </div>
+                                <!-- Summary Stats -->
+                                <div class="col-md-6">
+                                    <div class="card p-4" style="border-radius:15px;">
+                                        <h5 class="mb-3"><i class="fas fa-info-circle me-2 text-primary"></i>Quick Summary</h5>
+                                        <div class="row text-center g-3 mt-1">
+                                            <div class="col-6">
+                                                <div class="p-3 rounded" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;">
+                                                    <div style="font-size:2rem;font-weight:700;" th:text="${teachers.size()}">0</div>
+                                                    <div>Teachers</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-3 rounded" style="background:linear-gradient(135deg,#f093fb,#f5576c);color:white;">
+                                                    <div style="font-size:2rem;font-weight:700;" th:text="${students.size() + pendingStudents.size()}">0</div>
+                                                    <div>Students</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-3 rounded" style="background:linear-gradient(135deg,#4facfe,#00f2fe);color:white;">
+                                                    <div style="font-size:2rem;font-weight:700;" th:text="${classes.size()}">0</div>
+                                                    <div>Classes</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-3 rounded" style="background:linear-gradient(135deg,#43e97b,#38f9d7);color:white;">
+                                                    <div style="font-size:2rem;font-weight:700;" th:text="${subjects.size()}">0</div>
+                                                    <div>Subjects</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script th:inline="javascript">
+        var teacherCount = /*[[${teachers.size()}]]*/ 0;
+        var approvedStudentCount = /*[[${students.size()}]]*/ 0;
+        var pendingStudentCount = /*[[${pendingStudents.size()}]]*/ 0;
+        var classCount = /*[[${classes.size()}]]*/ 0;
+        var subjectCount = /*[[${subjects.size()}]]*/ 0;
+
+        var gradientColors = ['#667eea','#f093fb','#4facfe','#43e97b','#764ba2','#f5576c'];
+
+        // User Distribution Doughnut
+        new Chart(document.getElementById('userDistributionChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Teachers', 'Approved Students', 'Pending Students'],
+                datasets: [{
+                    data: [teacherCount, approvedStudentCount, pendingStudentCount],
+                    backgroundColor: ['#667eea', '#43e97b', '#ffc107'],
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                cutout: '60%'
+            }
+        });
+
+        // System Overview Bar
+        new Chart(document.getElementById('systemOverviewChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Teachers', 'Students', 'Classes', 'Subjects'],
+                datasets: [{
+                    label: 'Count',
+                    data: [teacherCount, approvedStudentCount + pendingStudentCount, classCount, subjectCount],
+                    backgroundColor: ['#667eea', '#f093fb', '#4facfe', '#43e97b'],
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Student Approval Status
+        new Chart(document.getElementById('studentStatusChart'), {
+            type: 'pie',
+            data: {
+                labels: ['Approved', 'Pending'],
+                datasets: [{
+                    data: [approvedStudentCount, pendingStudentCount],
+                    backgroundColor: ['#43e97b', '#ffc107'],
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        // Re-render charts when Analytics tab is shown
+        document.getElementById('analytics-tab').addEventListener('shown.bs.tab', function () {
+            Chart.instances && Object.values(Chart.instances).forEach(c => c.resize && c.resize());
+        });
+    </script>
+
+    <!-- View Teacher Modal -->
+    <div class="modal fade" id="viewTeacherModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-eye me-2"></i>View Teacher</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>ID:</strong> <span id="viewTeacherId"></span></p>
+                    <p><strong>Name:</strong> <span id="viewTeacherName"></span></p>
+                    <p><strong>Username:</strong> <span id="viewTeacherUsername"></span></p>
+                    <p><strong>Email:</strong> <span id="viewTeacherEmail"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Teacher Modal -->
+    <div class="modal fade" id="editTeacherModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Teacher</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editTeacherForm" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="editTeacherId" name="id">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="editTeacherName" name="fullName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" id="editTeacherUsername" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editTeacherEmail" name="email" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Teacher Modal -->
+    <div class="modal fade" id="deleteTeacherModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Delete Teacher</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="deleteTeacherForm" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="deleteTeacherId" name="id">
+                        <p>Are you sure you want to delete teacher <strong id="deleteTeacherName"></strong>?</p>
+                        <p class="text-danger"><small>This action cannot be undone.</small></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Similar modals for Student, Class, Subject (abbreviated for space) -->
+    <!-- View Student Modal -->
+    <div class="modal fade" id="viewStudentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-eye me-2"></i>View Student</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>ID:</strong> <span id="viewStudentId"></span></p>
+                    <p><strong>Name:</strong> <span id="viewStudentName"></span></p>
+                    <p><strong>Username:</strong> <span id="viewStudentUsername"></span></p>
+                    <p><strong>Email:</strong> <span id="viewStudentEmail"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Student Modal -->
+    <div class="modal fade" id="editStudentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Student</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editStudentForm" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="editStudentId" name="id">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="editStudentName" name="fullName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" id="editStudentUsername" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editStudentEmail" name="email" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Student Modal -->
+    <div class="modal fade" id="deleteStudentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Delete Student</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="deleteStudentForm" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="deleteStudentId" name="id">
+                        <p>Are you sure you want to delete student <strong id="deleteStudentName"></strong>?</p>
+                        <p class="text-danger"><small>This action cannot be undone.</small></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- View Class Modal -->
+    <div class="modal fade" id="viewClassModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-eye me-2"></i>View Class</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>ID:</strong> <span id="viewClassId"></span></p>
+                    <p><strong>Class Name:</strong> <span id="viewClassName"></span></p>
+                    <p><strong>Class Code:</strong> <span id="viewClassCode"></span></p>
+                    <p><strong>Description:</strong> <span id="viewClassDescription"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Class Modal -->
+    <div class="modal fade" id="editClassModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Class</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editClassForm" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="editClassId" name="id">
+                        <div class="mb-3">
+                            <label class="form-label">Class Name</label>
+                            <input type="text" class="form-control" id="editClassName" name="className" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Class Code</label>
+                            <input type="text" class="form-control" id="editClassCode" name="classCode" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="editClassDescription" name="description" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Class Modal -->
+    <div class="modal fade" id="deleteClassModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Delete Class</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="deleteClassForm" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="deleteClassId" name="id">
+                        <p>Are you sure you want to delete class <strong id="deleteClassName"></strong>?</p>
+                        <p class="text-danger"><small>This action cannot be undone.</small></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- View Subject Modal -->
+    <div class="modal fade" id="viewSubjectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-eye me-2"></i>View Subject</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>ID:</strong> <span id="viewSubjectId"></span></p>
+                    <p><strong>Subject Name:</strong> <span id="viewSubjectName"></span></p>
+                    <p><strong>Subject Code:</strong> <span id="viewSubjectCode"></span></p>
+                    <p><strong>Description:</strong> <span id="viewSubjectDescription"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Subject Modal -->
+    <div class="modal fade" id="editSubjectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Subject</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editSubjectForm" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="editSubjectId" name="id">
+                        <div class="mb-3">
+                            <label class="form-label">Subject Name</label>
+                            <input type="text" class="form-control" id="editSubjectName" name="subjectName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Subject Code</label>
+                            <input type="text" class="form-control" id="editSubjectCode" name="subjectCode" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="editSubjectDescription" name="description" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Subject Modal -->
+    <div class="modal fade" id="deleteSubjectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Delete Subject</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="deleteSubjectForm" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="deleteSubjectId" name="id">
+                        <p>Are you sure you want to delete subject <strong id="deleteSubjectName"></strong>?</p>
+                        <p class="text-danger"><small>This action cannot be undone.</small></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Filter functions
+        function filterTeachers() {
+            const search = document.getElementById('teacherSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#teachersTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        }
+        
+        function resetTeacherFilter() {
+            document.getElementById('teacherSearch').value = '';
+            document.querySelectorAll('#teachersTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+        }
+        
+        function filterStudents() {
+            const search = document.getElementById('studentSearch').value.toLowerCase();
+            const status = document.getElementById('studentStatusFilter').value;
+            const rows = document.querySelectorAll('#studentsTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const statusMatch = !status || (status === 'approved' && row.textContent.includes('Approved')) || 
+                                   (status === 'pending' && row.textContent.includes('Pending'));
+                row.style.display = (text.includes(search) && statusMatch) ? '' : 'none';
+            });
+        }
+        
+        function resetStudentFilter() {
+            document.getElementById('studentSearch').value = '';
+            document.getElementById('studentStatusFilter').value = '';
+            document.querySelectorAll('#studentsTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+        }
+        
+        function filterClasses() {
+            const search = document.getElementById('classSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#classesTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        }
+        
+        function resetClassFilter() {
+            document.getElementById('classSearch').value = '';
+            document.querySelectorAll('#classesTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+        }
+        
+        function filterSubjects() {
+            const search = document.getElementById('subjectSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#subjectsTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        }
+        
+        function resetSubjectFilter() {
+            document.getElementById('subjectSearch').value = '';
+            document.querySelectorAll('#subjectsTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+        }
+        
+        // CRUD Modal Functions - Teacher
+        function viewTeacherFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const username = button.getAttribute('data-username');
+            const email = button.getAttribute('data-email');
+            document.getElementById('viewTeacherId').textContent = id;
+            document.getElementById('viewTeacherName').textContent = name;
+            document.getElementById('viewTeacherUsername').textContent = username;
+            document.getElementById('viewTeacherEmail').textContent = email;
+            new bootstrap.Modal(document.getElementById('viewTeacherModal')).show();
+        }
+        
+        function editTeacherFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const username = button.getAttribute('data-username');
+            const email = button.getAttribute('data-email');
+            document.getElementById('editTeacherId').value = id;
+            document.getElementById('editTeacherName').value = name;
+            document.getElementById('editTeacherUsername').value = username;
+            document.getElementById('editTeacherEmail').value = email;
+            document.getElementById('editTeacherForm').action = '/admin/update-teacher';
+            new bootstrap.Modal(document.getElementById('editTeacherModal')).show();
+        }
+        
+        function deleteTeacherFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            document.getElementById('deleteTeacherId').value = id;
+            document.getElementById('deleteTeacherName').textContent = name;
+            document.getElementById('deleteTeacherForm').action = '/admin/delete-teacher';
+            new bootstrap.Modal(document.getElementById('deleteTeacherModal')).show();
+        }
+        
+        // CRUD Modal Functions - Student
+        function viewStudentFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const username = button.getAttribute('data-username');
+            const email = button.getAttribute('data-email');
+            document.getElementById('viewStudentId').textContent = id;
+            document.getElementById('viewStudentName').textContent = name;
+            document.getElementById('viewStudentUsername').textContent = username;
+            document.getElementById('viewStudentEmail').textContent = email;
+            new bootstrap.Modal(document.getElementById('viewStudentModal')).show();
+        }
+        
+        function editStudentFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const username = button.getAttribute('data-username');
+            const email = button.getAttribute('data-email');
+            document.getElementById('editStudentId').value = id;
+            document.getElementById('editStudentName').value = name;
+            document.getElementById('editStudentUsername').value = username;
+            document.getElementById('editStudentEmail').value = email;
+            document.getElementById('editStudentForm').action = '/admin/update-student';
+            new bootstrap.Modal(document.getElementById('editStudentModal')).show();
+        }
+        
+        function deleteStudentFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            document.getElementById('deleteStudentId').value = id;
+            document.getElementById('deleteStudentName').textContent = name;
+            document.getElementById('deleteStudentForm').action = '/admin/delete-student';
+            new bootstrap.Modal(document.getElementById('deleteStudentModal')).show();
+        }
+        
+        // CRUD Modal Functions - Class
+        function viewClassFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const code = button.getAttribute('data-code');
+            const description = button.getAttribute('data-description') || 'N/A';
+            document.getElementById('viewClassId').textContent = id;
+            document.getElementById('viewClassName').textContent = name;
+            document.getElementById('viewClassCode').textContent = code;
+            document.getElementById('viewClassDescription').textContent = description;
+            new bootstrap.Modal(document.getElementById('viewClassModal')).show();
+        }
+        
+        function editClassFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const code = button.getAttribute('data-code');
+            const description = button.getAttribute('data-description') || '';
+            document.getElementById('editClassId').value = id;
+            document.getElementById('editClassName').value = name;
+            document.getElementById('editClassCode').value = code;
+            document.getElementById('editClassDescription').value = description;
+            document.getElementById('editClassForm').action = '/admin/update-class';
+            new bootstrap.Modal(document.getElementById('editClassModal')).show();
+        }
+        
+        function deleteClassFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            document.getElementById('deleteClassId').value = id;
+            document.getElementById('deleteClassName').textContent = name;
+            document.getElementById('deleteClassForm').action = '/admin/delete-class';
+            new bootstrap.Modal(document.getElementById('deleteClassModal')).show();
+        }
+        
+        // CRUD Modal Functions - Subject
+        function viewSubjectFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const code = button.getAttribute('data-code');
+            const description = button.getAttribute('data-description') || 'N/A';
+            document.getElementById('viewSubjectId').textContent = id;
+            document.getElementById('viewSubjectName').textContent = name;
+            document.getElementById('viewSubjectCode').textContent = code;
+            document.getElementById('viewSubjectDescription').textContent = description;
+            new bootstrap.Modal(document.getElementById('viewSubjectModal')).show();
+        }
+        
+        function editSubjectFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const code = button.getAttribute('data-code');
+            const description = button.getAttribute('data-description') || '';
+            document.getElementById('editSubjectId').value = id;
+            document.getElementById('editSubjectName').value = name;
+            document.getElementById('editSubjectCode').value = code;
+            document.getElementById('editSubjectDescription').value = description;
+            document.getElementById('editSubjectForm').action = '/admin/update-subject';
+            new bootstrap.Modal(document.getElementById('editSubjectModal')).show();
+        }
+        
+        function deleteSubjectFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            document.getElementById('deleteSubjectId').value = id;
+            document.getElementById('deleteSubjectName').textContent = name;
+            document.getElementById('deleteSubjectForm').action = '/admin/delete-subject';
+            new bootstrap.Modal(document.getElementById('deleteSubjectModal')).show();
+        }
+    </script>
+</body>
+</html>

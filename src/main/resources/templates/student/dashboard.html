@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Attendance Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background Shapes */
+        .bg-shape {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.15;
+            animation: float 25s infinite ease-in-out;
+            z-index: 0;
+        }
+
+        .bg-shape-1 {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            top: -250px;
+            left: -250px;
+            animation-delay: 0s;
+        }
+
+        .bg-shape-2 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            bottom: -200px;
+            right: -200px;
+            animation-delay: 8s;
+        }
+
+        .bg-shape-3 {
+            width: 350px;
+            height: 350px;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            top: 50%;
+            right: -150px;
+            animation-delay: 16s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(60px, -60px) scale(1.1);
+            }
+            50% {
+                transform: translate(-40px, 40px) scale(0.9);
+            }
+            75% {
+                transform: translate(40px, 60px) scale(1.05);
+            }
+        }
+
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: sidebarGradient 10s ease infinite;
+            min-height: 100vh;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        @keyframes sidebarGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .sidebar .p-3 h4 {
+            animation: fadeInLeft 0.6s ease-out;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.9);
+            padding: 14px 20px;
+            border-radius: 12px;
+            margin: 6px 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInLeft 0.6s ease-out backwards;
+        }
+
+        .sidebar .nav-link:nth-child(1) { animation-delay: 0.1s; }
+        .sidebar .nav-link:nth-child(2) { animation-delay: 0.2s; }
+        .sidebar .nav-link:nth-child(3) { animation-delay: 0.3s; }
+        .sidebar .nav-link:nth-child(4) { animation-delay: 0.4s; }
+        .sidebar .nav-link:nth-child(5) { animation-delay: 0.5s; }
+
+        .sidebar .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: left 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover::before,
+        .sidebar .nav-link.active::before {
+            left: 0;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .sidebar .nav-link i {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover i {
+            transform: scale(1.2);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: statCardGradient 8s ease infinite, fadeInUp 0.6s ease-out backwards;
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.2s, 0.2s; }
+        .stat-card:nth-child(2) { animation-delay: 0.4s, 0.4s; }
+        .stat-card:nth-child(3) { animation-delay: 0.6s, 0.6s; }
+
+        @keyframes statCardGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        .stat-card .stat-icon {
+            font-size: 3.5rem;
+            opacity: 0.9;
+            animation: iconPulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .stat-card h3 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: buttonGradient 5s ease infinite;
+            border: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        @keyframes buttonGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-outline-success, .btn-outline-primary, .btn-outline-secondary {
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-outline-success:hover, .btn-outline-primary:hover, .btn-outline-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .table {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.6s ease-out 0.3s backwards;
+            background: white;
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: tableHeaderGradient 8s ease infinite;
+            color: white;
+        }
+
+        @keyframes tableHeaderGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .badge-present {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .badge-absent {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.6s ease-out backwards;
+            transition: all 0.3s ease;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.2s; }
+        .card:nth-child(2) { animation-delay: 0.4s; }
+        .card:nth-child(3) { animation-delay: 0.6s; }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+        }
+
+        h2 {
+            animation: fadeInLeft 0.6s ease-out;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background Shapes -->
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+    <div class="bg-shape bg-shape-3"></div>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <div class="p-3">
+                        <h4><i class="fas fa-user-graduate me-2"></i>Student Panel</h4>
+                        <hr>
+                    </div>
+                    <nav class="nav flex-column px-3">
+                        <a class="nav-link active" href="/student/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                        <a class="nav-link" href="/student/view-attendance">
+                            <i class="fas fa-history me-2"></i>View Attendance
+                        </a>
+                        <a class="nav-link" href="/student/mark-attendance-qr">
+                            <i class="fas fa-qrcode me-2"></i>Scan QR
+                        </a>
+                        <hr>
+                        <a class="nav-link" href="/change-password">
+                            <i class="fas fa-key me-2"></i>Change Password
+                        </a>
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-tachometer-alt me-2"></i>Student Dashboard</h2>
+                        <span class="text-muted">Welcome, <span th:text="${student.fullName}">Student</span></span>
+                    </div>
+                    
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs mb-4" id="studentTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="student-overview-tab" data-bs-toggle="tab" data-bs-target="#student-overview" type="button" role="tab">
+                                <i class="fas fa-tachometer-alt me-2"></i>Overview
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="student-analytics-tab" data-bs-toggle="tab" data-bs-target="#student-analytics" type="button" role="tab">
+                                <i class="fas fa-chart-bar me-2"></i>Analytics
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="studentTabContent">
+                    <div class="tab-pane fade show active" id="student-overview" role="tabpanel">
+
+                    <!-- Statistics Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="stat-card text-center">
+                                <i class="fas fa-book stat-icon"></i>
+                                <h3 th:text="${subjects.size()}">0</h3>
+                                <p class="mb-0">Available Subjects</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card text-center">
+                                <i class="fas fa-check-circle stat-icon"></i>
+                                <h3 th:text="${attendanceList.size()}">0</h3>
+                                <p class="mb-0">Total Attendance</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card text-center">
+                                <i class="fas fa-calendar-day stat-icon"></i>
+                                <h3 th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">Today</h3>
+                                <p class="mb-0">Today's Date</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-2">
+                                            <a href="/student/mark-attendance-qr" class="btn btn-outline-success w-100">
+                                                <i class="fas fa-qrcode me-2"></i>Scan QR
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <a href="/student/view-attendance" class="btn btn-outline-primary w-100">
+                                                <i class="fas fa-history me-2"></i>View Attendance
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <a href="/student/dashboard" class="btn btn-outline-secondary w-100">
+                                                <i class="fas fa-refresh me-2"></i>Refresh
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Available Subjects -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-book me-2"></i>Available Subjects</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Subject Name</th>
+                                                    <th>Subject Code</th>
+                                                    <th>Teacher</th>
+                                                    <th>Description</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="subject : ${subjects}">
+                                                    <td th:text="${subject.subjectName}">Mathematics</td>
+                                                    <td>
+                                                        <span class="badge bg-primary" th:text="${subject.subjectCode}">MATH101</span>
+                                                    </td>
+                                                    <td>
+                                                        <span th:if="${teacherMap != null && subject.teacherId != null && teacherMap.containsKey(subject.teacherId)}" 
+                                                              th:text="${teacherMap.get(subject.teacherId).fullName}">Dr. Smith</span>
+                                                        <span th:if="${teacherMap == null || subject.teacherId == null || !teacherMap.containsKey(subject.teacherId)}">N/A</span>
+                                                    </td>
+                                                    <td th:text="${subject.description != null ? subject.description : 'N/A'}">Basic Mathematics</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Attendance -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-history me-2"></i>Recent Attendance</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Subject</th>
+                                                    <th>Date</th>
+                                                    <th>Time</th>
+                                                    <th>Status</th>
+                                                    <th>Location</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:if="${attendanceList == null || attendanceList.isEmpty()}">
+                                                    <td colspan="5" class="text-center text-muted">
+                                                        <i class="fas fa-info-circle me-2"></i>No attendance records yet.
+                                                    </td>
+                                                </tr>
+                                                <tr th:each="attendance : ${attendanceList != null ? attendanceList : {}}">
+                                                    <td>
+                                                        <span th:if="${subjectMap != null && attendance.subjectId != null && subjectMap.containsKey(attendance.subjectId)}" 
+                                                              th:text="${subjectMap.get(attendance.subjectId).subjectName}">Mathematics</span>
+                                                        <span th:if="${subjectMap == null || attendance.subjectId == null || !subjectMap.containsKey(attendance.subjectId)}">N/A</span>
+                                                    </td>
+                                                    <td th:text="${attendance.attendanceDate != null ? attendance.attendanceDate.substring(0, 10) : 'N/A'}">01/01/2024</td>
+                                                    <td th:text="${attendance.attendanceDate != null ? attendance.attendanceDate.substring(11, 16) : 'N/A'}">10:30</td>
+                                                    <td>
+                                                        <span class="badge badge-present" th:text="${attendance.status != null ? attendance.status : 'N/A'}">PRESENT</span>
+                                                    </td>
+                                                    <td th:text="${attendance.locationAddress != null ? attendance.locationAddress : 'N/A'}">Classroom A</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div><!-- end student-overview tab-pane -->
+
+                    <!-- Analytics Tab -->
+                    <div class="tab-pane fade" id="student-analytics" role="tabpanel">
+                        <div class="row mt-3 g-4">
+                            <!-- Attendance Status Doughnut -->
+                            <div class="col-md-6">
+                                <div class="card p-4" style="border-radius:15px;">
+                                    <h5 class="mb-3"><i class="fas fa-chart-pie me-2 text-primary"></i>Attendance Status Breakdown</h5>
+                                    <canvas id="studentStatusChart" height="280"></canvas>
+                                </div>
+                            </div>
+                            <!-- Attendance per Subject Bar -->
+                            <div class="col-md-6">
+                                <div class="card p-4" style="border-radius:15px;">
+                                    <h5 class="mb-3"><i class="fas fa-chart-bar me-2 text-primary"></i>Attendance per Subject</h5>
+                                    <canvas id="subjectAttendanceChart" height="280"></canvas>
+                                </div>
+                            </div>
+                            <!-- Summary Stats -->
+                            <div class="col-12">
+                                <div class="card p-4" style="border-radius:15px;">
+                                    <h5 class="mb-3"><i class="fas fa-info-circle me-2 text-primary"></i>Attendance Summary</h5>
+                                    <div class="row text-center g-3">
+                                        <div class="col-md-3">
+                                            <div class="p-3 rounded" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;">
+                                                <div style="font-size:2rem;font-weight:700;" th:text="${attendanceList.size()}">0</div>
+                                                <div>Total Records</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="p-3 rounded" style="background:linear-gradient(135deg,#43e97b,#38f9d7);color:white;">
+                                                <div style="font-size:2rem;font-weight:700;" th:text="${attendanceList.?[status == 'PRESENT'].size()}">0</div>
+                                                <div>Present</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="p-3 rounded" style="background:linear-gradient(135deg,#f5576c,#fd7e14);color:white;">
+                                                <div style="font-size:2rem;font-weight:700;" th:text="${attendanceList.?[status == 'ABSENT'].size()}">0</div>
+                                                <div>Absent</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="p-3 rounded" style="background:linear-gradient(135deg,#ffc107,#ff8c00);color:white;">
+                                                <div style="font-size:2rem;font-weight:700;" th:text="${subjects.size()}">0</div>
+                                                <div>Subjects Enrolled</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- end student-analytics tab-pane -->
+
+                    </div><!-- end tab-content -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script th:inline="javascript">
+        var sPresentCount = /*[[${attendanceList.?[status == 'PRESENT'].size()}]]*/ 0;
+        var sAbsentCount = /*[[${attendanceList.?[status == 'ABSENT'].size()}]]*/ 0;
+        var sLateCount = /*[[${attendanceList.?[status == 'LATE'].size()}]]*/ 0;
+
+        // Build per-subject attendance from DOM table
+        var subjectRecords = {};
+        document.querySelectorAll('#student-overview tbody tr').forEach(function(row) {
+            var cells = row.querySelectorAll('td');
+            if (cells.length >= 4) {
+                var subjectName = cells[0].textContent.trim();
+                if (subjectName && subjectName !== 'N/A' && subjectName.indexOf('No attendance') === -1) {
+                    subjectRecords[subjectName] = (subjectRecords[subjectName] || 0) + 1;
+                }
+            }
+        });
+        var subjectNames = Object.keys(subjectRecords);
+        var subjectCounts = Object.values(subjectRecords);
+
+        // Status Doughnut
+        new Chart(document.getElementById('studentStatusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Present', 'Absent', 'Late'],
+                datasets: [{
+                    data: [sPresentCount, sAbsentCount, sLateCount],
+                    backgroundColor: ['#43e97b', '#f5576c', '#ffc107'],
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom' } },
+                cutout: '60%'
+            }
+        });
+
+        // Per-Subject Bar
+        new Chart(document.getElementById('subjectAttendanceChart'), {
+            type: 'bar',
+            data: {
+                labels: subjectNames.length > 0 ? subjectNames : ['No Data'],
+                datasets: [{
+                    label: 'Attendance Records',
+                    data: subjectCounts.length > 0 ? subjectCounts : [0],
+                    backgroundColor: ['#667eea', '#f093fb', '#4facfe', '#43e97b', '#ffc107', '#f5576c'],
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        document.getElementById('student-analytics-tab').addEventListener('shown.bs.tab', function () {
+            Object.values(Chart.instances).forEach(c => c.resize && c.resize());
+        });
+    </script>
+</body>
+</html>

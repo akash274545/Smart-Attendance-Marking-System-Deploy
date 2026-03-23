@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Attendance - Attendance Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+            padding: 2rem;
+        }
+        .table thead {
+            background: rgba(102, 126, 234, 0.15);
+            color: #4c51bf;
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+        }
+        .status-badge {
+            border-radius: 20px;
+            padding: 0.35rem 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .status-present {
+            background: rgba(40, 167, 69, 0.15);
+            color: #198754;
+        }
+        .empty-state {
+            padding: 3rem 1rem;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card mb-4">
+                    <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                        <div>
+                            <h3 class="fw-bold mb-1">
+                                <i class="fas fa-calendar-check me-2"></i>My Attendance
+                            </h3>
+                            <p class="mb-0 opacity-75">Review your attendance history and confirm marked sessions.</p>
+                        </div>
+                        <div class="mt-3 mt-md-0">
+                            <a href="/student/dashboard" class="btn btn-outline-light me-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back
+                            </a>
+                            <a href="/student/mark-attendance-qr" class="btn btn-gradient">
+                                <i class="fas fa-qrcode me-2"></i>Scan QR
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Subject</th>
+                                        <th>Teacher</th>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                        <th>Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${attendanceList.isEmpty()}">
+                                        <td colspan="7" class="empty-state">
+                                            <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                            <p class="mb-0">No attendance records available yet. Mark attendance to see it here.</p>
+                                        </td>
+                                    </tr>
+                                    <tr th:each="record, iter : ${attendanceList != null ? attendanceList : {}}">
+                                        <td th:text="${iter.index + 1}">1</td>
+                                        <td>
+                                            <span th:if="${subjectMap != null && record.subjectId != null && subjectMap.containsKey(record.subjectId)}" 
+                                                  th:text="${subjectMap.get(record.subjectId).subjectName}">Mathematics</span>
+                                            <span th:if="${subjectMap == null || record.subjectId == null || !subjectMap.containsKey(record.subjectId)}">N/A</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${subjectMap != null && record.subjectId != null && subjectMap.containsKey(record.subjectId) && 
+                                                          teacherMap != null && subjectMap.get(record.subjectId).teacherId != null && 
+                                                          teacherMap.containsKey(subjectMap.get(record.subjectId).teacherId)}" 
+                                                  th:text="${teacherMap.get(subjectMap.get(record.subjectId).teacherId).fullName}">Dr. Smith</span>
+                                            <span th:if="${subjectMap == null || record.subjectId == null || !subjectMap.containsKey(record.subjectId) || 
+                                                          teacherMap == null || subjectMap.get(record.subjectId).teacherId == null || 
+                                                          !teacherMap.containsKey(subjectMap.get(record.subjectId).teacherId)}">N/A</span>
+                                        </td>
+                                        <td th:text="${record.attendanceDate != null ? record.attendanceDate.substring(0, 10) : 'N/A'}">25 Mar 2025</td>
+                                        <td th:text="${record.attendanceDate != null ? record.attendanceDate.substring(11, 16) : 'N/A'}">09:30</td>
+                                        <td>
+                                            <span class="status-badge status-present" th:text="${record.status != null ? record.status : 'N/A'}">PRESENT</span>
+                                        </td>
+                                        <td th:text="${record.locationAddress != null ? record.locationAddress : 'N/A'}">Classroom A</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

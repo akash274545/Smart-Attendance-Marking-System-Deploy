@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Subject - Teacher Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <div class="p-3">
+                        <h4><i class="fas fa-chalkboard-teacher me-2"></i>Teacher Panel</h4>
+                        <hr>
+                    </div>
+                    <nav class="nav flex-column px-3">
+                        <a class="nav-link" href="/teacher/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                        <a class="nav-link active" href="/teacher/add-subject">
+                            <i class="fas fa-book me-2"></i>Add Subject
+                        </a>
+                        <hr>
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-book me-2"></i>Add New Subject</h2>
+                        <a href="/teacher/dashboard" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                    
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-book me-2"></i>Subject Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div th:if="${error}" class="alert alert-danger" role="alert">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        <span th:text="${error}"></span>
+                                    </div>
+                                    
+                                    <div th:if="${success}" class="alert alert-success" role="alert">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <span th:text="${success}"></span>
+                                    </div>
+                                    
+                                    <form th:action="@{/teacher/add-subject}" method="post" id="addSubjectForm">
+                                        <div class="mb-3">
+                                            <label for="classId" class="form-label">
+                                                <i class="fas fa-school me-2"></i>Select Class
+                                            </label>
+                                            <select class="form-control" id="classId" name="classId" required>
+                                                <option value="">-- Select a Class --</option>
+                                                <option th:each="classItem : ${classes}" 
+                                                        th:value="${classItem.id}"
+                                                        th:text="${classItem.className + ' (' + classItem.classCode + ')'}">
+                                                </option>
+                                            </select>
+                                            <div class="invalid-feedback">Please select a class</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="selectedSubjectId" class="form-label">
+                                                <i class="fas fa-book me-2"></i>Select Subject
+                                            </label>
+                                            <select class="form-control" id="selectedSubjectId" name="selectedSubjectId">
+                                                <option value="">-- Select a Subject (Optional) --</option>
+                                                <option th:each="defaultSubject : ${defaultSubjects}" 
+                                                        th:value="${defaultSubject.id}"
+                                                        th:data-name="${defaultSubject.subjectName}"
+                                                        th:data-code="${defaultSubject.subjectCode}"
+                                                        th:data-description="${defaultSubject.description}"
+                                                        th:text="${defaultSubject.subjectName + ' (' + defaultSubject.subjectCode + ')'}">
+                                                </option>
+                                            </select>
+                                            <div class="form-text">Select from default subjects or enter manually below</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="subjectName" class="form-label">
+                                                <i class="fas fa-book me-2"></i>Subject Name
+                                            </label>
+                                            <input type="text" class="form-control" id="subjectName" name="subjectName" required>
+                                            <div class="invalid-feedback" id="subjectNameError"></div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="subjectCode" class="form-label">
+                                                <i class="fas fa-code me-2"></i>Subject Code
+                                            </label>
+                                            <input type="text" class="form-control" id="subjectCode" name="subjectCode" required>
+                                            <div class="form-text">Share this code with students to mark attendance</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="description" class="form-label">
+                                                <i class="fas fa-align-left me-2"></i>Description
+                                            </label>
+                                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                                        </div>
+                                        
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>Note:</strong> This subject will be assigned to you automatically. 
+                                            Students will use the subject code to mark their attendance.
+                                        </div>
+                                        
+                                        <div class="text-center">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-book me-2"></i>Add Subject
+                                            </button>
+                                            <a href="/teacher/dashboard" class="btn btn-outline-secondary ms-2">
+                                                <i class="fas fa-times me-2"></i>Cancel
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Subject Name validation: Only characters/string (letters and spaces), no numbers
+        function validateSubjectName(subjectName) {
+            const subjectNameRegex = /^[a-zA-Z\s]+$/;
+            return subjectNameRegex.test(subjectName);
+        }
+
+        // Auto-populate subject fields when default subject is selected
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('addSubjectForm');
+            const subjectSelect = document.getElementById('selectedSubjectId');
+            const subjectNameInput = document.getElementById('subjectName');
+            const subjectCodeInput = document.getElementById('subjectCode');
+            const descriptionInput = document.getElementById('description');
+            const subjectNameError = document.getElementById('subjectNameError');
+            
+            // Get all default subject options with their data
+            const subjectOptions = {};
+            document.querySelectorAll('#selectedSubjectId option').forEach(option => {
+                if (option.value) {
+                    subjectOptions[option.value] = {
+                        name: option.textContent.split(' (')[0],
+                        code: option.getAttribute('data-code'),
+                        description: option.getAttribute('data-description') || ''
+                    };
+                }
+            });
+            
+            // Handle subject selection change
+            subjectSelect.addEventListener('change', function() {
+                const selectedSubjectId = this.value;
+                if (selectedSubjectId && subjectOptions[selectedSubjectId]) {
+                    const selectedSubject = subjectOptions[selectedSubjectId];
+                    subjectNameInput.value = selectedSubject.name;
+                    subjectCodeInput.value = selectedSubject.code;
+                    descriptionInput.value = selectedSubject.description;
+                }
+            });
+
+            // Subject Name validation
+            subjectNameInput.addEventListener('input', function() {
+                const value = this.value.trim();
+                if (value && !validateSubjectName(value)) {
+                    this.classList.add('is-invalid');
+                    subjectNameError.textContent = 'Subject Name must contain only letters and spaces, no numbers allowed.';
+                } else {
+                    this.classList.remove('is-invalid');
+                    subjectNameError.textContent = '';
+                }
+            });
+
+            // Form submission validation
+            form.addEventListener('submit', function(e) {
+                const subjectNameValid = validateSubjectName(subjectNameInput.value.trim());
+
+                if (!subjectNameValid) {
+                    e.preventDefault();
+                    subjectNameInput.classList.add('is-invalid');
+                    subjectNameError.textContent = 'Subject Name must contain only letters and spaces, no numbers allowed.';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance - Student Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .location-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <div class="p-3">
+                        <h4><i class="fas fa-user-graduate me-2"></i>Student Panel</h4>
+                        <hr>
+                    </div>
+                    <nav class="nav flex-column px-3">
+                        <a class="nav-link" href="/student/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                        <a class="nav-link active" href="/student/mark-attendance">
+                            <i class="fas fa-check-circle me-2"></i>Mark Attendance
+                        </a>
+                        <a class="nav-link" href="/student/mark-attendance-qr">
+                            <i class="fas fa-qrcode me-2"></i>Scan QR
+                        </a>
+                        <a class="nav-link" href="/student/view-attendance">
+                            <i class="fas fa-history me-2"></i>View Attendance
+                        </a>
+                        <hr>
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-check-circle me-2"></i>Mark Attendance</h2>
+                        <a href="/student/dashboard" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                    
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-map-marker-alt me-2"></i>Attendance Form</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div th:if="${error}" class="alert alert-danger" role="alert">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        <span th:text="${error}"></span>
+                                    </div>
+                                    
+                                    <div th:if="${success}" class="alert alert-success" role="alert">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <span th:text="${success}"></span>
+                                    </div>
+                                    
+                                    <!-- Location Information -->
+                                    <div class="location-info">
+                                        <h6><i class="fas fa-info-circle me-2"></i>Location Information</h6>
+                                        <p class="mb-0">Please ensure your device location is enabled to mark attendance accurately.</p>
+                                    </div>
+                                    
+                                    <form th:action="@{/student/mark-attendance}" method="post" id="attendanceForm">
+                                        <div class="mb-3">
+                                            <label for="subjectCode" class="form-label">
+                                                <i class="fas fa-book me-2"></i>Subject Code
+                                            </label>
+                                            <input type="text" class="form-control" id="subjectCode" name="subjectCode" 
+                                                   placeholder="Enter subject code provided by teacher" required>
+                                            <div class="form-text">Enter the subject code shared by your teacher</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="locationAddress" class="form-label">
+                                                <i class="fas fa-map-marker-alt me-2"></i>Location Address
+                                            </label>
+                                            <input type="text" class="form-control" id="locationAddress" name="locationAddress" 
+                                                   placeholder="Enter your current location" required>
+                                            <div class="form-text">Describe your current location (e.g., Classroom A, Library, etc.)</div>
+                                        </div>
+                                        
+                                        <!-- Hidden fields for coordinates -->
+                                        <input type="hidden" id="latitude" name="latitude">
+                                        <input type="hidden" id="longitude" name="longitude">
+                                        
+                                        <div class="text-center">
+                                            <button type="button" class="btn btn-outline-primary me-2" onclick="getCurrentLocation()">
+                                                <i class="fas fa-location-arrow me-2"></i>Get Current Location
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-check-circle me-2"></i>Mark Attendance
+                                            </button>
+                                        </div>
+                                    </form>
+                                    
+                                    <!-- Available Subjects -->
+                                    <div class="mt-4">
+                                        <h6><i class="fas fa-list me-2"></i>Available Subjects</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Subject</th>
+                                                        <th>Code</th>
+                                                        <th>Teacher</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr th:each="subject : ${subjects}">
+                                                        <td th:text="${subject.subjectName}">Mathematics</td>
+                                                        <td>
+                                                            <span class="badge bg-primary" th:text="${subject.subjectCode}">MATH101</span>
+                                                        </td>
+                                                        <td>
+                                                            <span th:if="${teacherMap != null && subject.teacherId != null && teacherMap.containsKey(subject.teacherId)}" 
+                                                                  th:text="${teacherMap.get(subject.teacherId).fullName}">Dr. Smith</span>
+                                                            <span th:if="${teacherMap == null || subject.teacherId == null || !teacherMap.containsKey(subject.teacherId)}">N/A</span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        document.getElementById('latitude').value = position.coords.latitude;
+                        document.getElementById('longitude').value = position.coords.longitude;
+                        
+                        // Try to get address from coordinates (simplified)
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        // You can integrate with a geocoding service here
+                        document.getElementById('locationAddress').value = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+                        
+                        alert('Location captured successfully!');
+                    },
+                    function(error) {
+                        alert('Error getting location: ' + error.message);
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+        
+        // Auto-fill location address when coordinates are available
+        document.getElementById('locationAddress').addEventListener('input', function() {
+            if (this.value && !document.getElementById('latitude').value) {
+                // If user manually enters location, set default coordinates
+                document.getElementById('latitude').value = '0.0';
+                document.getElementById('longitude').value = '0.0';
+            }
+        });
+    </script>
+</body>
+</html>

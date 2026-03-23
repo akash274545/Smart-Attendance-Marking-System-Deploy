@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Access - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .filter-section {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+        }
+        .tab-content {
+            padding: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <div class="p-3">
+                        <h4><i class="fas fa-graduation-cap me-2"></i>Admin Panel</h4>
+                        <hr>
+                    </div>
+                    <nav class="nav flex-column px-3">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                        <a class="nav-link" href="/admin/add-teacher">
+                            <i class="fas fa-user-plus me-2"></i>Add Teacher
+                        </a>
+                        <a class="nav-link" href="/admin/add-class">
+                            <i class="fas fa-school me-2"></i>Add Class
+                        </a>
+                        <a class="nav-link active" href="/admin/master-access">
+                            <i class="fas fa-database me-2"></i>Master Access
+                        </a>
+                        <hr>
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-database me-2"></i>Master Access</h2>
+                        <span class="text-muted">Complete System Data Management</span>
+                    </div>
+                    
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs" id="masterTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="teachers-tab" data-bs-toggle="tab" data-bs-target="#teachers" type="button" role="tab">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>Teachers
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab">
+                                <i class="fas fa-user-graduate me-2"></i>Students
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="classes-tab" data-bs-toggle="tab" data-bs-target="#classes" type="button" role="tab">
+                                <i class="fas fa-school me-2"></i>Classes
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="subjects-tab" data-bs-toggle="tab" data-bs-target="#subjects" type="button" role="tab">
+                                <i class="fas fa-book me-2"></i>Subjects
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="masterTabContent">
+                        <!-- Teachers Tab -->
+                        <div class="tab-pane fade show active" id="teachers" role="tabpanel">
+                            <div class="filter-section">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="teacherSearch" placeholder="Search by name, username, or email...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary w-100" onclick="filterTeachers()">
+                                            <i class="fas fa-search me-2"></i>Filter
+                                        </button>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-outline-secondary w-100" onclick="resetTeacherFilter()">
+                                            <i class="fas fa-redo me-2"></i>Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="teachersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="teacher : ${teachers}">
+                                            <td th:text="${teacher.id}">1</td>
+                                            <td th:text="${teacher.fullName}">John Doe</td>
+                                            <td th:text="${teacher.username}">johndoe</td>
+                                            <td th:text="${teacher.email}">john@example.com</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info" onclick="viewTeacher('${teacher.id}')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-warning" onclick="editTeacher('${teacher.id}')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deleteTeacher('${teacher.id}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Students Tab -->
+                        <div class="tab-pane fade" id="students" role="tabpanel">
+                            <div class="filter-section">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="studentSearch" placeholder="Search by name, username, or email...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select class="form-control" id="studentStatusFilter">
+                                            <option value="">All Status</option>
+                                            <option value="approved">Approved</option>
+                                            <option value="pending">Pending</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary w-100" onclick="filterStudents()">
+                                            <i class="fas fa-search me-2"></i>Filter
+                                        </button>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-outline-secondary w-100" onclick="resetStudentFilter()">
+                                            <i class="fas fa-redo me-2"></i>Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="studentsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="student : ${students}">
+                                            <td th:text="${student.id}">1</td>
+                                            <td th:text="${student.fullName}">John Doe</td>
+                                            <td th:text="${student.username}">johndoe</td>
+                                            <td th:text="${student.email}">john@example.com</td>
+                                            <td>
+                                                <span class="badge bg-success">Approved</span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info" onclick="viewStudent('${student.id}')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-warning" onclick="editStudent('${student.id}')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deleteStudent('${student.id}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Classes Tab -->
+                        <div class="tab-pane fade" id="classes" role="tabpanel">
+                            <div class="filter-section">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="classSearch" placeholder="Search by name or code...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary w-100" onclick="filterClasses()">
+                                            <i class="fas fa-search me-2"></i>Filter
+                                        </button>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-outline-secondary w-100" onclick="resetClassFilter()">
+                                            <i class="fas fa-redo me-2"></i>Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="classesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Class Name</th>
+                                            <th>Class Code</th>
+                                            <th>Description</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="classItem : ${classes}">
+                                            <td th:text="${classItem.id}">1</td>
+                                            <td th:text="${classItem.className}">First Year</td>
+                                            <td th:text="${classItem.classCode}">FY</td>
+                                            <td th:text="${classItem.description}">Description</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info" onclick="viewClass('${classItem.id}')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-warning" onclick="editClass('${classItem.id}')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deleteClass('${classItem.id}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Subjects Tab -->
+                        <div class="tab-pane fade" id="subjects" role="tabpanel">
+                            <div class="filter-section">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="subjectSearch" placeholder="Search by name or code...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary w-100" onclick="filterSubjects()">
+                                            <i class="fas fa-search me-2"></i>Filter
+                                        </button>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-outline-secondary w-100" onclick="resetSubjectFilter()">
+                                            <i class="fas fa-redo me-2"></i>Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="subjectsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Subject Name</th>
+                                            <th>Subject Code</th>
+                                            <th>Description</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="subject : ${subjects}">
+                                            <td th:text="${subject.id}">1</td>
+                                            <td th:text="${subject.subjectName}">Mathematics</td>
+                                            <td th:text="${subject.subjectCode}">MATH101</td>
+                                            <td th:text="${subject.description}">Description</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info" onclick="viewSubject('${subject.id}')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-warning" onclick="editSubject('${subject.id}')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deleteSubject('${subject.id}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Filter functions
+        function filterTeachers() {
+            const search = document.getElementById('teacherSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#teachersTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        }
+        
+        function resetTeacherFilter() {
+            document.getElementById('teacherSearch').value = '';
+            document.querySelectorAll('#teachersTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+        }
+        
+        function filterStudents() {
+            const search = document.getElementById('studentSearch').value.toLowerCase();
+            const status = document.getElementById('studentStatusFilter').value;
+            const rows = document.querySelectorAll('#studentsTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const statusMatch = !status || (status === 'approved' && row.textContent.includes('Approved')) || 
+                                   (status === 'pending' && row.textContent.includes('Pending'));
+                row.style.display = (text.includes(search) && statusMatch) ? '' : 'none';
+            });
+        }
+        
+        function resetStudentFilter() {
+            document.getElementById('studentSearch').value = '';
+            document.getElementById('studentStatusFilter').value = '';
+            document.querySelectorAll('#studentsTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+        }
+        
+        function filterClasses() {
+            const search = document.getElementById('classSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#classesTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        }
+        
+        function resetClassFilter() {
+            document.getElementById('classSearch').value = '';
+            document.querySelectorAll('#classesTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+        }
+        
+        function filterSubjects() {
+            const search = document.getElementById('subjectSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#subjectsTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        }
+        
+        function resetSubjectFilter() {
+            document.getElementById('subjectSearch').value = '';
+            document.querySelectorAll('#subjectsTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+        }
+        
+        // CRUD placeholder functions
+        function viewTeacher(id) { alert('View teacher: ' + id); }
+        function editTeacher(id) { alert('Edit teacher: ' + id); }
+        function deleteTeacher(id) { if(confirm('Delete teacher?')) alert('Delete: ' + id); }
+        function viewStudent(id) { alert('View student: ' + id); }
+        function editStudent(id) { alert('Edit student: ' + id); }
+        function deleteStudent(id) { if(confirm('Delete student?')) alert('Delete: ' + id); }
+        function viewClass(id) { alert('View class: ' + id); }
+        function editClass(id) { alert('Edit class: ' + id); }
+        function deleteClass(id) { if(confirm('Delete class?')) alert('Delete: ' + id); }
+        function viewSubject(id) { alert('View subject: ' + id); }
+        function editSubject(id) { alert('Edit subject: ' + id); }
+        function deleteSubject(id) { if(confirm('Delete subject?')) alert('Delete: ' + id); }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - Attendance Management System</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow-x: hidden;
+        background: linear-gradient(
+          135deg,
+          #667eea 0%,
+          #764ba2 50%,
+          #f093fb 100%
+        );
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        padding: 2rem 0;
+      }
+
+      @keyframes gradientShift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      /* Animated Background Shapes */
+      .shape {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.3;
+        animation: float 20s infinite ease-in-out;
+      }
+
+      .shape-1 {
+        width: 400px;
+        height: 400px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        top: -200px;
+        left: -200px;
+        animation-delay: 0s;
+      }
+
+      .shape-2 {
+        width: 350px;
+        height: 350px;
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+        bottom: -150px;
+        right: -150px;
+        animation-delay: 5s;
+      }
+
+      .shape-3 {
+        width: 300px;
+        height: 300px;
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        top: 50%;
+        right: -100px;
+        animation-delay: 10s;
+      }
+
+      .shape-4 {
+        width: 250px;
+        height: 250px;
+        background: linear-gradient(135deg, #43e97b, #38f9d7);
+        bottom: 20%;
+        left: -100px;
+        animation-delay: 15s;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        25% {
+          transform: translate(50px, -50px) scale(1.1);
+        }
+        50% {
+          transform: translate(-30px, 30px) scale(0.9);
+        }
+        75% {
+          transform: translate(30px, 50px) scale(1.05);
+        }
+      }
+
+      /* Geometric Shapes */
+      .geometric-shape {
+        position: absolute;
+        opacity: 0.1;
+        animation: rotate 30s linear infinite;
+      }
+
+      .triangle {
+        width: 0;
+        height: 0;
+        border-left: 100px solid transparent;
+        border-right: 100px solid transparent;
+        border-bottom: 150px solid rgba(255, 255, 255, 0.3);
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+      }
+
+      .square {
+        width: 120px;
+        height: 120px;
+        background: rgba(255, 255, 255, 0.2);
+        transform: rotate(45deg);
+        bottom: 15%;
+        right: 15%;
+        animation-delay: 10s;
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .container {
+        position: relative;
+        z-index: 10;
+        animation: fadeInUp 1s ease-out;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .register-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 30px;
+        box-shadow:
+          0 20px 60px rgba(0, 0, 0, 0.3),
+          0 0 0 1px rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        overflow: hidden;
+        position: relative;
+        animation: cardPulse 3s ease-in-out infinite;
+      }
+
+      @keyframes cardPulse {
+        0%,
+        100% {
+          box-shadow:
+            0 20px 60px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+        50% {
+          box-shadow:
+            0 25px 70px rgba(102, 126, 234, 0.4),
+            0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+      }
+
+      .register-header {
+        background: linear-gradient(
+          135deg,
+          #667eea 0%,
+          #764ba2 50%,
+          #f093fb 100%
+        );
+        background-size: 200% 200%;
+        animation: headerGradient 8s ease infinite;
+        color: white;
+        border-radius: 0;
+        padding: 2.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      @keyframes headerGradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .register-header::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.1) 0%,
+          transparent 70%
+        );
+        animation: shimmer 3s linear infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .register-header i {
+        animation: iconBounce 2s ease-in-out infinite;
+        display: inline-block;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+      }
+
+      @keyframes iconBounce {
+        0%,
+        100% {
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          transform: translateY(-10px) scale(1.1);
+        }
+      }
+
+      .register-header h3 {
+        margin-top: 1rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .card-body {
+        padding: 2.5rem;
+        position: relative;
+      }
+
+      .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        transition: color 0.3s ease;
+        animation: fadeInLeft 0.6s ease-out backwards;
+      }
+
+      .form-label:nth-of-type(1) {
+        animation-delay: 0.2s;
+      }
+      .form-label:nth-of-type(2) {
+        animation-delay: 0.3s;
+      }
+      .form-label:nth-of-type(3) {
+        animation-delay: 0.4s;
+      }
+      .form-label:nth-of-type(4) {
+        animation-delay: 0.5s;
+      }
+
+      @keyframes fadeInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .form-label i {
+        color: #667eea;
+        transition:
+          transform 0.3s ease,
+          color 0.3s ease;
+      }
+
+      .mb-3,
+      .mb-4 {
+        animation: fadeInUp 0.6s ease-out backwards;
+      }
+
+      .mb-3:nth-of-type(1) {
+        animation-delay: 0.3s;
+      }
+      .mb-3:nth-of-type(2) {
+        animation-delay: 0.4s;
+      }
+      .mb-3:nth-of-type(3) {
+        animation-delay: 0.5s;
+      }
+      .mb-4 {
+        animation-delay: 0.6s;
+      }
+
+      .form-control {
+        border-radius: 15px;
+        border: 2px solid #e9ecef;
+        padding: 14px 18px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+        font-size: 15px;
+      }
+
+      .form-control:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+      }
+
+      .form-control:focus {
+        border-color: #667eea;
+        box-shadow:
+          0 0 0 0.3rem rgba(102, 126, 234, 0.25),
+          0 8px 20px rgba(102, 126, 234, 0.2);
+        transform: translateY(-2px);
+        background: white;
+        outline: none;
+      }
+
+      .input-group .btn {
+        border-radius: 0 15px 15px 0;
+        border-left: none;
+        transition: all 0.3s ease;
+      }
+
+      .input-group .btn:hover {
+        background: #667eea;
+        color: white;
+        transform: scale(1.1);
+      }
+
+      .btn-register {
+        background: linear-gradient(
+          135deg,
+          #667eea 0%,
+          #764ba2 50%,
+          #f093fb 100%
+        );
+        background-size: 200% 200%;
+        animation: buttonGradient 5s ease infinite;
+        border: none;
+        border-radius: 15px;
+        padding: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        animation:
+          fadeInUp 0.6s ease-out 0.7s backwards,
+          buttonGradient 5s ease infinite;
+      }
+
+      @keyframes buttonGradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .btn-register::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition:
+          width 0.6s,
+          height 0.6s;
+      }
+
+      .btn-register:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+
+      .btn-register:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+      }
+
+      .btn-register:active {
+        transform: translateY(-1px) scale(0.98);
+      }
+
+      .btn-register i {
+        position: relative;
+        z-index: 1;
+        transition: transform 0.3s ease;
+      }
+
+      .btn-register:hover i {
+        transform: translateX(5px);
+      }
+
+      .login-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        position: relative;
+        transition: color 0.3s ease;
+      }
+
+      .login-link::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transition: width 0.3s ease;
+      }
+
+      .login-link:hover {
+        color: #764ba2;
+      }
+
+      .login-link:hover::after {
+        width: 100%;
+      }
+
+      .alert {
+        border-radius: 15px;
+        border: none;
+        animation: slideDown 0.5s ease-out;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .text-center.mt-4 {
+        animation: fadeInUp 0.6s ease-out 0.9s backwards;
+      }
+
+      /* Floating particles effect */
+      .particles {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+
+      .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        animation: particleFloat 15s infinite linear;
+      }
+
+      @keyframes particleFloat {
+        0% {
+          transform: translateY(100vh) translateX(0);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-100px) translateX(100px);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Animated Background Shapes -->
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+    <div class="shape shape-4"></div>
+
+    <!-- Geometric Shapes -->
+    <div class="geometric-shape triangle"></div>
+    <div class="geometric-shape square"></div>
+
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+          <div class="card register-card">
+            <div class="register-header">
+              <i class="fas fa-user-plus fa-3x mb-3"></i>
+              <h3>Student Registration</h3>
+              <p class="mb-0">Create your student account</p>
+            </div>
+            <div class="card-body p-4">
+              <div th:if="${error}" class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+              </div>
+
+              <div th:if="${success}" class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${success}"></span>
+              </div>
+
+              <form th:action="@{/register}" method="post" id="registerForm">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="username" class="form-label">
+                      <i class="fas fa-user me-2"></i>Username
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="username"
+                      name="username"
+                      required
+                    />
+                    <div class="invalid-feedback" id="usernameError"></div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">
+                      <i class="fas fa-envelope me-2"></i>Email
+                    </label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="email"
+                      name="email"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="fullName" class="form-label">
+                    <i class="fas fa-id-card me-2"></i>Full Name
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="fullName"
+                    name="fullName"
+                    required
+                  />
+                  <div class="invalid-feedback" id="fullNameError"></div>
+                  <!-- ✅ ADD THIS -->
+                </div>
+
+                <div class="mb-4">
+                  <label for="password" class="form-label">
+                    <i class="fas fa-lock me-2"></i>Password
+                  </label>
+                  <div class="input-group">
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="password"
+                      name="password"
+                      required
+                    />
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      id="togglePassword"
+                    >
+                      <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                    </button>
+                  </div>
+                  <div class="invalid-feedback" id="passwordError"></div>
+                  <div class="form-text">
+                    <small
+                      >Password must contain: uppercase, lowercase, number, and
+                      special character</small
+                    >
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-register w-100"
+                >
+                  <i class="fas fa-user-plus me-2"></i>Register
+                </button>
+              </form>
+
+              <div class="text-center mt-4">
+                <p class="mb-0">
+                  Already have an account?
+                  <a href="/login" class="login-link">Sign In</a>
+                </p>
+              </div>
+
+              <div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Note:</strong> After registration, your account will be
+                pending approval from a teacher.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      function createParticles() {
+        const particlesContainer = document.getElementById("particles");
+        const particleCount = 30;
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement("div");
+          particle.className = "particle";
+          particle.style.left = Math.random() * 100 + "%";
+          particle.style.animationDelay = Math.random() * 15 + "s";
+          particle.style.animationDuration = 10 + Math.random() * 10 + "s";
+          particle.style.width = particle.style.height =
+            2 + Math.random() * 3 + "px";
+          particlesContainer.appendChild(particle);
+        }
+      }
+
+      function validateUsername(username) {
+        return /^[a-zA-Z]+$/.test(username);
+      }
+
+      function validatePassword(password) {
+        return (
+          /[A-Z]/.test(password) &&
+          /[a-z]/.test(password) &&
+          /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) &&
+          /[0-9]/.test(password)
+        );
+      }
+
+      // ✅ NEW: Full name validation
+      function validateFullName(fullName) {
+        const nameRegex = /^[a-zA-Z\s]+$/;
+        const words = fullName.trim().split(/\s+/);
+        return (
+          nameRegex.test(fullName) &&
+          words.length >= 2 &&
+          words.every((w) => w.length > 0)
+        );
+      }
+
+      function setupPasswordToggle() {
+        const togglePassword = document.getElementById("togglePassword");
+        const passwordInput = document.getElementById("password");
+        const toggleIcon = document.getElementById("togglePasswordIcon");
+        if (togglePassword && passwordInput) {
+          togglePassword.addEventListener("click", function () {
+            const type =
+              passwordInput.getAttribute("type") === "password"
+                ? "text"
+                : "password";
+            passwordInput.setAttribute("type", type);
+            toggleIcon.classList.toggle("fa-eye");
+            toggleIcon.classList.toggle("fa-eye-slash");
+          });
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        createParticles();
+        setupPasswordToggle();
+
+        const form = document.getElementById("registerForm");
+        const usernameInput = document.getElementById("username");
+        const passwordInput = document.getElementById("password");
+        const fullNameInput = document.getElementById("fullName"); // ✅
+        const usernameError = document.getElementById("usernameError");
+        const passwordError = document.getElementById("passwordError");
+        const fullNameError = document.getElementById("fullNameError"); // ✅
+
+        // Username validation
+        usernameInput.addEventListener("input", function () {
+          const value = this.value.trim();
+          if (value && !validateUsername(value)) {
+            this.classList.add("is-invalid");
+            usernameError.textContent =
+              "Username must contain only letters, no numbers allowed.";
+          } else {
+            this.classList.remove("is-invalid");
+            usernameError.textContent = "";
+          }
+        });
+
+        // ✅ Full name validation
+        fullNameInput.addEventListener("input", function () {
+          const value = this.value;
+          if (value && !validateFullName(value)) {
+            this.classList.add("is-invalid");
+            fullNameError.textContent =
+              "Full name must contain only letters and at least two words (e.g. John Smith).";
+          } else {
+            this.classList.remove("is-invalid");
+            fullNameError.textContent = "";
+          }
+        });
+
+        // Password validation
+        passwordInput.addEventListener("input", function () {
+          const value = this.value;
+          if (value && !validatePassword(value)) {
+            this.classList.add("is-invalid");
+            passwordError.textContent =
+              "Password must contain uppercase, lowercase, number, and special character.";
+          } else {
+            this.classList.remove("is-invalid");
+            passwordError.textContent = "";
+          }
+        });
+
+        // Form submit validation
+        form.addEventListener("submit", function (e) {
+          let valid = true;
+
+          if (!validateUsername(usernameInput.value.trim())) {
+            e.preventDefault();
+            valid = false;
+            usernameInput.classList.add("is-invalid");
+            usernameError.textContent =
+              "Username must contain only letters, no numbers allowed.";
+          }
+
+          // ✅ Full name check on submit
+          if (!validateFullName(fullNameInput.value)) {
+            e.preventDefault();
+            valid = false;
+            fullNameInput.classList.add("is-invalid");
+            fullNameError.textContent =
+              "Full name must contain only letters and at least two words (e.g. John Smith).";
+          }
+
+          if (!validatePassword(passwordInput.value)) {
+            e.preventDefault();
+            valid = false;
+            passwordInput.classList.add("is-invalid");
+            passwordError.textContent =
+              "Password must contain uppercase, lowercase, number, and special character.";
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
