@@ -67,6 +67,10 @@ public class AttendanceService {
         return saveAttendance(attendance);
     }
     
+    public List<Attendance> findAll() {
+        return firebaseAttendanceService.findAll();
+    }
+
     public boolean hasMarkedAttendanceToday(User student, Subject subject) {
         LocalDateTime now = LocalDateTime.now();
         List<Attendance> todayAttendance = findByStudentAndSubjectAndDate(student, subject, now);

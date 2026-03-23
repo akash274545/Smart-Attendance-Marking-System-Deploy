@@ -1,8 +1,10 @@
 package com.attendance.controller;
 
+import com.attendance.entity.Attendance;
 import com.attendance.entity.User;
 import com.attendance.entity.ClassEntity;
 import com.attendance.entity.Subject;
+import com.attendance.service.AttendanceService;
 import com.attendance.service.UserService;
 import com.attendance.service.SubjectService;
 import com.attendance.service.ClassService;
@@ -13,7 +15,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.format.TextStyle;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
@@ -30,6 +36,9 @@ public class AdminController {
     
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private AttendanceService attendanceService;
     
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -288,6 +297,88 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("success", "Subject deleted successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to delete subject: " + e.getMessage());
+        }
+        return "redirect:/admin/dashboard";
+    }
+
+    // Send Monthly Attendance Report
+    @PostMapping("/send-monthly-report")
+    public String sendMonthlyReport(@RequestParam int month,
+                                    @RequestParam int year,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            List<User> students = userService.findApprovedStudents();
+            List<Attendance> allAttendance = attendanceService.findAll();
+            List<Subject> allSubjects = subjectService.findAllSubjects();
+
+            // Build subjectId -> Subject map
+            Map<String, Subject> subjectMap = allSubjects.stream()
+                .collect(Collectors.toMap(Subject::getId, s -> s, (a, b) -> a));
+
+            // Filter attendance for the selected month/year
+            List<Attendance> monthlyAttendance = allAttendance.stream()
+                .filter(a -> {
+                    if (a.getAttendanceDate() == null) return false;
+                    try {
+                        LocalDateTime dt = LocalDateTime.parse(a.getAttendanceDate());
+                        return dt.getMonthValue() == month && dt.getYear() == year;
+                    } catch (Exception e) { return false; }
+                })
+                .collect(Collectors.toList());
+
+            // Total classes held per subject in this month (distinct dates)
+            Map<String, Long> totalClassesPerSubject = monthlyAttendance.stream()
+                .collect(Collectors.groupingBy(Attendance::getSubjectId,
+                    Collectors.collectingAndThen(
+                        Collectors.mapping(a -> {
+                            try { return LocalDateTime.parse(a.getAttendanceDate()).toLocalDate().toString(); }
+                            catch (Exception e) { return ""; }
+                        }, Collectors.toSet()),
+                        Set::size
+                    )
+                )).entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> (long) e.getValue()));
+
+            String monthYear = Month.of(month).getDisplayName(TextStyle.FULL, Locale.ENGLISH) + " " + year;
+            int sent = 0, failed = 0;
+
+            for (User student : students) {
+                if (student.getEmail() == null || student.getEmail().isBlank()) continue;
+
+                // This student's attendance in the month
+                Map<String, Long> presentPerSubject = monthlyAttendance.stream()
+                    .filter(a -> student.getId().equals(a.getStudentId()) && "PRESENT".equals(a.getStatus()))
+                    .collect(Collectors.groupingBy(Attendance::getSubjectId, Collectors.counting()));
+
+                if (presentPerSubject.isEmpty()) continue; // skip students with no activity
+
+                List<Map<String, String>> rows = new ArrayList<>();
+                for (Map.Entry<String, Long> entry : presentPerSubject.entrySet()) {
+                    String subjectId = entry.getKey();
+                    Subject subject = subjectMap.get(subjectId);
+                    if (subject == null) continue;
+                    long present = entry.getValue();
+                    long total = totalClassesPerSubject.getOrDefault(subjectId, present);
+                    double pct = total > 0 ? (present * 100.0 / total) : 0;
+                    Map<String, String> row = new LinkedHashMap<>();
+                    row.put("subject", subject.getSubjectName() + " (" + subject.getSubjectCode() + ")");
+                    row.put("present", String.valueOf(present));
+                    row.put("total", String.valueOf(total));
+                    row.put("percent", String.valueOf(pct));
+                    rows.add(row);
+                }
+
+                boolean ok = emailService.sendMonthlyAttendanceReport(
+                    student.getEmail(), student.getFullName(), monthYear, rows);
+                if (ok) sent++; else failed++;
+            }
+
+            String msg = "Monthly report sent to " + sent + " student(s).";
+            if (failed > 0) msg += " " + failed + " failed.";
+            redirectAttributes.addFlashAttribute("success", msg);
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to send reports: " + e.getMessage());
         }
         return "redirect:/admin/dashboard";
     }
