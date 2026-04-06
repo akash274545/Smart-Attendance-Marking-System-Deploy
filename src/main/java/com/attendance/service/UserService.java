@@ -102,6 +102,17 @@ public class UserService {
         return firebaseUserService.save(user);
     }
     
+    public boolean resetPassword(String userId, String newPassword) {
+        Optional<User> userOpt = firebaseUserService.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setPassword(passwordEncoder.encode(newPassword));
+            firebaseUserService.save(user);
+            return true;
+        }
+        return false;
+    }
+
     public boolean changePassword(String userId, String oldPassword, String newPassword) {
         Optional<User> userOpt = firebaseUserService.findById(userId);
         if (userOpt.isPresent()) {

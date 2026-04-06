@@ -147,34 +147,95 @@ public class HomeController {
                               @RequestParam String password,
                               @RequestParam String email,
                               @RequestParam String fullName,
+                              @RequestParam(required = false) String parentEmail,
                               Model model) {
         try {
             if (userService.existsByUsername(username)) {
                 model.addAttribute("error", "Username already exists");
                 return "register";
             }
-            
+
             if (userService.existsByEmail(email)) {
                 model.addAttribute("error", "Email already exists");
                 return "register";
             }
-            
+
             User user = new User();
             user.setUsername(username);
             user.setPassword(password);
             user.setEmail(email);
             user.setFullName(fullName);
+            user.setParentEmail(parentEmail != null && !parentEmail.isBlank() ? parentEmail : null);
             user.setRoleId(2); // Student role
             user.setIsApproved(false);
-            
+
             userService.saveUser(user);
             model.addAttribute("success", "Registration successful! Please wait for teacher approval.");
             return "login";
-            
+
         } catch (Exception e) {
             model.addAttribute("error", "Registration failed: " + e.getMessage());
             return "register";
         }
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPasswordForm() {
+        return "forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String forgotPassword(@RequestParam String usernameOrEmail, Model model, HttpSession session) {
+        try {
+            var userOpt = userService.findByUsername(usernameOrEmail);
+            if (userOpt.isEmpty()) {
+                userOpt = userService.findByEmail(usernameOrEmail);
+            }
+            if (userOpt.isEmpty()) {
+                model.addAttribute("error", "No account found with that username or email.");
+                return "forgot-password";
+            }
+            User user = userOpt.get();
+            otpService.generateOTP(user.getEmail(), user.getUsername());
+            session.setAttribute("resetUserId", user.getId());
+            session.setAttribute("resetEmail", user.getEmail());
+            model.addAttribute("email", user.getEmail());
+            model.addAttribute("success", "OTP sent to your registered email.");
+            return "forgot-password";
+        } catch (Exception e) {
+            model.addAttribute("error", "Failed to send OTP: " + e.getMessage());
+            return "forgot-password";
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestParam String otp,
+                                @RequestParam String newPassword,
+                                @RequestParam String confirmPassword,
+                                Model model, HttpSession session) {
+        String email = (String) session.getAttribute("resetEmail");
+        String userId = (String) session.getAttribute("resetUserId");
+        if (email == null || userId == null) {
+            model.addAttribute("error", "Session expired. Please start again.");
+            return "forgot-password";
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            model.addAttribute("error", "Passwords do not match.");
+            model.addAttribute("showReset", true);
+            model.addAttribute("email", email);
+            return "forgot-password";
+        }
+        if (!otpService.validateOTP(email, otp)) {
+            model.addAttribute("error", "Invalid or expired OTP.");
+            model.addAttribute("showReset", true);
+            model.addAttribute("email", email);
+            return "forgot-password";
+        }
+        userService.resetPassword(userId, newPassword);
+        session.removeAttribute("resetUserId");
+        session.removeAttribute("resetEmail");
+        model.addAttribute("success", "Password reset successfully! You can now log in.");
+        return "login";
     }
     
     @GetMapping("/dashboard")

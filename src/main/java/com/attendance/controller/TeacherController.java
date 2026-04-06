@@ -103,13 +103,6 @@ public class TeacherController {
                 return "redirect:/login";
             }
             
-            if (subjectService.existsBySubjectCode(subjectCode)) {
-                model.addAttribute("error", "Subject code already exists");
-                model.addAttribute("teacher", teacher);
-                model.addAttribute("classes", classService.findAllClasses());
-                return "teacher/add-subject";
-            }
-            
             Subject subject = new Subject();
             subject.setSubjectName(subjectName);
             subject.setSubjectCode(subjectCode);

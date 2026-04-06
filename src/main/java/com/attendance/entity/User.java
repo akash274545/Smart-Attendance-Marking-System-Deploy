@@ -30,6 +30,8 @@ public class User {
     private Boolean isApproved = false;
     
     private String createdAt;
+
+    private String parentEmail;
     
     // Constructors
     public User() {
@@ -110,6 +112,14 @@ public class User {
         this.createdAt = createdAt;
     }
     
+    public String getParentEmail() {
+        return parentEmail;
+    }
+
+    public void setParentEmail(String parentEmail) {
+        this.parentEmail = parentEmail;
+    }
+
     // Helper methods
     public boolean isAdmin() {
         return roleId != null && roleId == 0;

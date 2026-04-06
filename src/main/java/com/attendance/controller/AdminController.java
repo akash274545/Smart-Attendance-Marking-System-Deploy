@@ -1,10 +1,13 @@
 package com.attendance.controller;
 
 import com.attendance.entity.Attendance;
+import com.attendance.entity.AttendanceToken;
 import com.attendance.entity.User;
 import com.attendance.entity.ClassEntity;
 import com.attendance.entity.Subject;
 import com.attendance.service.AttendanceService;
+import com.attendance.service.AttendanceTokenService;
+import com.attendance.service.FirebaseAttendanceTokenService;
 import com.attendance.service.UserService;
 import com.attendance.service.SubjectService;
 import com.attendance.service.ClassService;
@@ -39,6 +42,9 @@ public class AdminController {
 
     @Autowired
     private AttendanceService attendanceService;
+
+    @Autowired
+    private FirebaseAttendanceTokenService firebaseAttendanceTokenService;
     
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -310,12 +316,30 @@ public class AdminController {
             List<User> students = userService.findApprovedStudents();
             List<Attendance> allAttendance = attendanceService.findAll();
             List<Subject> allSubjects = subjectService.findAllSubjects();
+            List<AttendanceToken> allTokens = firebaseAttendanceTokenService.findAll();
 
-            // Build subjectId -> Subject map
             Map<String, Subject> subjectMap = allSubjects.stream()
                 .collect(Collectors.toMap(Subject::getId, s -> s, (a, b) -> a));
 
-            // Filter attendance for the selected month/year
+            // ── Class dates per subject: from QR tokens generated this month ──
+            // QR generated = class was held that day
+            Map<String, List<String>> classDatesPerSubject = new LinkedHashMap<>();
+            for (AttendanceToken token : allTokens) {
+                if (token.getSubjectId() == null || token.getCreatedAt() == null) continue;
+                try {
+                    LocalDateTime dt = LocalDateTime.parse(token.getCreatedAt());
+                    if (dt.getMonthValue() != month || dt.getYear() != year) continue;
+                    String dateStr = dt.toLocalDate().toString();
+                    classDatesPerSubject
+                        .computeIfAbsent(token.getSubjectId(), k -> new ArrayList<>())
+                        .add(dateStr);
+                } catch (Exception ignore) {}
+            }
+            // Deduplicate and sort
+            classDatesPerSubject.replaceAll((sid, dates) ->
+                dates.stream().distinct().sorted().collect(Collectors.toList()));
+
+            // ── All PRESENT records for this month ──
             List<Attendance> monthlyAttendance = allAttendance.stream()
                 .filter(a -> {
                     if (a.getAttendanceDate() == null) return false;
@@ -326,18 +350,14 @@ public class AdminController {
                 })
                 .collect(Collectors.toList());
 
-            // Total classes held per subject in this month (distinct dates)
-            Map<String, Long> totalClassesPerSubject = monthlyAttendance.stream()
-                .collect(Collectors.groupingBy(Attendance::getSubjectId,
-                    Collectors.collectingAndThen(
-                        Collectors.mapping(a -> {
-                            try { return LocalDateTime.parse(a.getAttendanceDate()).toLocalDate().toString(); }
-                            catch (Exception e) { return ""; }
-                        }, Collectors.toSet()),
-                        Set::size
-                    )
-                )).entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> (long) e.getValue()));
+            // ── Subjects each student has ever attended (enrollment proxy) ──
+            Map<String, Set<String>> studentEnrolledSubjects = new LinkedHashMap<>();
+            for (Attendance a : allAttendance) {
+                if (a.getStudentId() == null || a.getSubjectId() == null) continue;
+                studentEnrolledSubjects
+                    .computeIfAbsent(a.getStudentId(), k -> new LinkedHashSet<>())
+                    .add(a.getSubjectId());
+            }
 
             String monthYear = Month.of(month).getDisplayName(TextStyle.FULL, Locale.ENGLISH) + " " + year;
             int sent = 0, failed = 0;
@@ -345,31 +365,77 @@ public class AdminController {
             for (User student : students) {
                 if (student.getEmail() == null || student.getEmail().isBlank()) continue;
 
-                // This student's attendance in the month
-                Map<String, Long> presentPerSubject = monthlyAttendance.stream()
-                    .filter(a -> student.getId().equals(a.getStudentId()) && "PRESENT".equals(a.getStatus()))
-                    .collect(Collectors.groupingBy(Attendance::getSubjectId, Collectors.counting()));
+                // Subjects this student is enrolled in (ever attended)
+                Set<String> enrolledSubjectIds = studentEnrolledSubjects
+                    .getOrDefault(student.getId(), new LinkedHashSet<>());
 
-                if (presentPerSubject.isEmpty()) continue; // skip students with no activity
+                // For this month: subjects that had classes AND student is enrolled in
+                Set<String> reportSubjectIds = new LinkedHashSet<>(classDatesPerSubject.keySet());
+                if (!enrolledSubjectIds.isEmpty()) {
+                    reportSubjectIds.retainAll(enrolledSubjectIds);
+                }
+
+                // If student has no enrollment yet, still send — show all subjects with classes
+                // so they know what they missed
+                if (reportSubjectIds.isEmpty() && !classDatesPerSubject.isEmpty()) {
+                    // Student never attended any class — report all subjects with classes this month
+                    reportSubjectIds = new LinkedHashSet<>(classDatesPerSubject.keySet());
+                }
+
+                if (reportSubjectIds.isEmpty()) continue;
+
+                // Student's PRESENT dates per subject this month
+                Map<String, Set<String>> studentPresentDates = new LinkedHashMap<>();
+                for (Attendance a : monthlyAttendance) {
+                    if (!student.getId().equals(a.getStudentId())) continue;
+                    if (!"PRESENT".equalsIgnoreCase(a.getStatus())) continue;
+                    String dateStr = "";
+                    try { dateStr = LocalDateTime.parse(a.getAttendanceDate()).toLocalDate().toString(); }
+                    catch (Exception ignore) {}
+                    if (!dateStr.isEmpty()) {
+                        studentPresentDates
+                            .computeIfAbsent(a.getSubjectId(), k -> new LinkedHashSet<>())
+                            .add(dateStr);
+                    }
+                }
 
                 List<Map<String, String>> rows = new ArrayList<>();
-                for (Map.Entry<String, Long> entry : presentPerSubject.entrySet()) {
-                    String subjectId = entry.getKey();
+                for (String subjectId : reportSubjectIds) {
                     Subject subject = subjectMap.get(subjectId);
                     if (subject == null) continue;
-                    long present = entry.getValue();
-                    long total = totalClassesPerSubject.getOrDefault(subjectId, present);
-                    double pct = total > 0 ? (present * 100.0 / total) : 0;
+                    List<String> classDates = classDatesPerSubject.getOrDefault(subjectId, new ArrayList<>());
+                    if (classDates.isEmpty()) continue;
+
+                    Set<String> presentDates = studentPresentDates.getOrDefault(subjectId, new LinkedHashSet<>());
+                    long total   = classDates.size();
+                    long present = presentDates.size();
+                    long absent  = total - present;
+                    double pct   = total > 0 ? (present * 100.0 / total) : 0;
+
+                    String dayWise = classDates.stream()
+                        .map(d -> d + ":" + (presentDates.contains(d) ? "PRESENT" : "ABSENT"))
+                        .collect(Collectors.joining(","));
+
                     Map<String, String> row = new LinkedHashMap<>();
                     row.put("subject", subject.getSubjectName() + " (" + subject.getSubjectCode() + ")");
+                    row.put("total",   String.valueOf(total));
                     row.put("present", String.valueOf(present));
-                    row.put("total", String.valueOf(total));
+                    row.put("absent",  String.valueOf(absent));
                     row.put("percent", String.valueOf(pct));
+                    row.put("dayWise", dayWise);
                     rows.add(row);
                 }
 
+                if (rows.isEmpty()) continue;
+
+                List<String> recipients = new ArrayList<>();
+                recipients.add(student.getEmail());
+                if (student.getParentEmail() != null && !student.getParentEmail().isBlank()) {
+                    recipients.add(student.getParentEmail());
+                }
+
                 boolean ok = emailService.sendMonthlyAttendanceReport(
-                    student.getEmail(), student.getFullName(), monthYear, rows);
+                    recipients, student.getFullName(), monthYear, rows);
                 if (ok) sent++; else failed++;
             }
 
@@ -379,6 +445,121 @@ public class AdminController {
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to send reports: " + e.getMessage());
+        }
+        return "redirect:/admin/dashboard";
+    }
+
+    // Send Overall Attendance Report (all time, not month-specific)
+    @PostMapping("/send-overall-report")
+    public String sendOverallReport(RedirectAttributes redirectAttributes) {
+        try {
+            List<User> students = userService.findApprovedStudents();
+            List<Attendance> allAttendance = attendanceService.findAll();
+            List<Subject> allSubjects = subjectService.findAllSubjects();
+            List<AttendanceToken> allTokens = firebaseAttendanceTokenService.findAll();
+
+            Map<String, Subject> subjectMap = allSubjects.stream()
+                .collect(Collectors.toMap(Subject::getId, s -> s, (a, b) -> a));
+
+            // All class dates per subject (all time) — from QR tokens
+            Map<String, List<String>> allClassDatesPerSubject = new LinkedHashMap<>();
+            for (AttendanceToken token : allTokens) {
+                if (token.getSubjectId() == null || token.getCreatedAt() == null) continue;
+                try {
+                    String dateStr = LocalDateTime.parse(token.getCreatedAt()).toLocalDate().toString();
+                    allClassDatesPerSubject
+                        .computeIfAbsent(token.getSubjectId(), k -> new ArrayList<>())
+                        .add(dateStr);
+                } catch (Exception ignore) {}
+            }
+            allClassDatesPerSubject.replaceAll((sid, dates) ->
+                dates.stream().distinct().sorted().collect(Collectors.toList()));
+
+            // Enrolled subjects per student (ever attended)
+            Map<String, Set<String>> studentEnrolledSubjects = new LinkedHashMap<>();
+            for (Attendance a : allAttendance) {
+                if (a.getStudentId() == null || a.getSubjectId() == null) continue;
+                studentEnrolledSubjects
+                    .computeIfAbsent(a.getStudentId(), k -> new LinkedHashSet<>())
+                    .add(a.getSubjectId());
+            }
+
+            int sent = 0, failed = 0;
+
+            for (User student : students) {
+                if (student.getEmail() == null || student.getEmail().isBlank()) continue;
+
+                Set<String> enrolledSubjectIds = studentEnrolledSubjects
+                    .getOrDefault(student.getId(), new LinkedHashSet<>());
+
+                Set<String> reportSubjectIds = new LinkedHashSet<>(allClassDatesPerSubject.keySet());
+                if (!enrolledSubjectIds.isEmpty()) {
+                    reportSubjectIds.retainAll(enrolledSubjectIds);
+                }
+
+                if (reportSubjectIds.isEmpty()) continue;
+
+                // Student's PRESENT dates per subject (all time)
+                Map<String, Set<String>> studentPresentDates = new LinkedHashMap<>();
+                for (Attendance a : allAttendance) {
+                    if (!student.getId().equals(a.getStudentId())) continue;
+                    if (!"PRESENT".equalsIgnoreCase(a.getStatus())) continue;
+                    String dateStr = "";
+                    try { dateStr = LocalDateTime.parse(a.getAttendanceDate()).toLocalDate().toString(); }
+                    catch (Exception ignore) {}
+                    if (!dateStr.isEmpty()) {
+                        studentPresentDates
+                            .computeIfAbsent(a.getSubjectId(), k -> new LinkedHashSet<>())
+                            .add(dateStr);
+                    }
+                }
+
+                List<Map<String, String>> rows = new ArrayList<>();
+                for (String subjectId : reportSubjectIds) {
+                    Subject subject = subjectMap.get(subjectId);
+                    if (subject == null) continue;
+                    List<String> classDates = allClassDatesPerSubject.getOrDefault(subjectId, new ArrayList<>());
+                    if (classDates.isEmpty()) continue;
+
+                    Set<String> presentDates = studentPresentDates.getOrDefault(subjectId, new LinkedHashSet<>());
+                    long total   = classDates.size();
+                    long present = presentDates.size();
+                    long absent  = total - present;
+                    double pct   = total > 0 ? (present * 100.0 / total) : 0;
+
+                    String dayWise = classDates.stream()
+                        .map(d -> d + ":" + (presentDates.contains(d) ? "PRESENT" : "ABSENT"))
+                        .collect(Collectors.joining(","));
+
+                    Map<String, String> row = new LinkedHashMap<>();
+                    row.put("subject", subject.getSubjectName() + " (" + subject.getSubjectCode() + ")");
+                    row.put("total",   String.valueOf(total));
+                    row.put("present", String.valueOf(present));
+                    row.put("absent",  String.valueOf(absent));
+                    row.put("percent", String.valueOf(pct));
+                    row.put("dayWise", dayWise);
+                    rows.add(row);
+                }
+
+                if (rows.isEmpty()) continue;
+
+                List<String> recipients = new ArrayList<>();
+                recipients.add(student.getEmail());
+                if (student.getParentEmail() != null && !student.getParentEmail().isBlank()) {
+                    recipients.add(student.getParentEmail());
+                }
+
+                boolean ok = emailService.sendMonthlyAttendanceReport(
+                    recipients, student.getFullName(), "Overall (All Time)", rows);
+                if (ok) sent++; else failed++;
+            }
+
+            String msg = "Overall report sent to " + sent + " student(s).";
+            if (failed > 0) msg += " " + failed + " failed.";
+            redirectAttributes.addFlashAttribute("success", msg);
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to send overall reports: " + e.getMessage());
         }
         return "redirect:/admin/dashboard";
     }
