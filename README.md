@@ -499,13 +499,13 @@ Using Maven Wrapper on Windows:
 The application uses port:
 
 ```text
-8080
+8081
 ```
 
 Open:
 
 ```text
-http://localhost:8080
+http://localhost:8081
 ```
 
 ---
@@ -515,7 +515,7 @@ http://localhost:8080
 After successfully starting the application, open:
 
 ```text
-http://localhost:8080
+http://localhost:8081
 ```
 
 The application provides separate authentication and dashboards for:
