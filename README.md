@@ -1,170 +1,265 @@
-# Attendance Management System
+# QR Based Smart Attendance and Reporting System
 
-A Java full-stack application built with Spring Boot backend and HTML frontend for managing student attendance with role-based access control.
+A Java full-stack web application built with Spring Boot, Thymeleaf, JavaScript, and Firebase Realtime Database for managing student attendance using QR codes, role-based access control, location tracking, reports, and email notifications.
 
-## Features
+---
 
-### Roles and Access Control
-- **Admin (Role ID: 0)**: System administrator with full access
-- **Teacher (Role ID: 1)**: Can manage subjects and approve students
-- **Student (Role ID: 2)**: Can register and mark attendance
+## 📌 Project Overview
 
-### Key Functionalities
-- **User Registration**: Students can register on the website
-- **Student Approval**: Teachers can approve registered students
-- **Subject Management**: Teachers can create subjects with unique codes
-- **Attendance Marking**: Students can mark attendance using subject codes with location tracking
-- **Dashboard Views**: Role-specific dashboards with statistics and management options
+The **QR Based Smart Attendance and Reporting System** is designed to automate and simplify the traditional attendance process.
 
-## Technology Stack
+The system provides separate access and functionality for:
 
-### Backend
-- **Java 17**
+- **Admin**
+- **Teacher**
+- **Student**
+
+Teachers can generate attendance QR codes, while students can scan the QR code to mark attendance. The system stores attendance information in Firebase Realtime Database and provides dashboards and attendance reports.
+
+The application also supports location information during attendance marking and email-based functionality.
+
+---
+
+## ✨ Features
+
+### 👨‍💼 Admin
+
+- Admin authentication
+- Admin dashboard
+- View system statistics
+- Add and manage teachers
+- Add and manage subjects
+- Add and manage classes
+- Manage system-level information
+
+### 👨‍🏫 Teacher
+
+- Teacher authentication
+- Teacher dashboard
+- Create subjects with unique subject codes
+- Approve registered students
+- Generate QR codes for attendance
+- View subject-wise attendance
+- Monitor student attendance
+- Manage assigned subjects
+
+### 👨‍🎓 Student
+
+- Student registration
+- Student authentication
+- Student approval workflow
+- Student dashboard
+- Mark attendance using subject codes
+- Mark attendance using QR codes
+- Location-based attendance information
+- View personal attendance records
+- View attendance history
+
+### 📱 QR-Based Attendance
+
+- Teachers can generate QR codes for attendance.
+- QR codes contain attendance-related token information.
+- Attendance tokens can have an expiry time.
+- Students scan the QR code to mark attendance.
+- The system validates the attendance token before recording attendance.
+
+### 📍 Location Tracking
+
+The system supports location information during attendance marking.
+
+Attendance records can contain:
+
+- Latitude
+- Longitude
+- Location address
+
+This information can be used for attendance verification.
+
+### 📧 Email Functionality
+
+The application includes Gmail SMTP-based email functionality for sending system-related emails and attendance information.
+
+Email credentials are stored using environment variables and are **not stored in the GitHub repository**.
+
+### 📊 Dashboards and Reports
+
+Role-specific dashboards provide information relevant to each user.
+
+The system supports:
+
+- Attendance records
+- Attendance history
+- Subject information
+- Student information
+- Teacher information
+- Attendance reporting
+
+---
+
+# 🛠️ Technology Stack
+
+## Backend
+
+- **Java 21**
 - **Spring Boot 3.2.0**
-- **Spring Security** (Authentication & Authorization)
-- **Firebase Admin SDK** (Firebase Realtime Database operations)
-- **Firebase Realtime Database** (NoSQL Database)
-- **Thymeleaf** (Template engine)
+- **Spring Security**
+- **Spring Mail**
+- **Firebase Admin SDK**
+- **Firebase Realtime Database**
+- **Maven**
 
-### Frontend
+## Frontend
+
 - **HTML5**
-- **Bootstrap 5.3.0** (Styling)
-- **Font Awesome 6.0.0** (Icons)
-- **JavaScript** (Client-side functionality)
+- **CSS3**
+- **Bootstrap 5.3**
+- **JavaScript**
+- **Thymeleaf**
+- **Font Awesome**
 
-## Firebase Setup
+## Database
 
-### Prerequisites
-1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com)
-2. Enable Realtime Database in your Firebase project
-3. Get your Firebase Realtime Database URL
-4. Download Firebase service account JSON file (for authentication)
+- **Firebase Realtime Database**
 
-### Firebase Configuration
+## Development Tools
 
-1. **Create Firebase Project**
-   - Go to [Firebase Console](https://console.firebase.google.com)
-   - Click "Add project" and follow the setup wizard
-   - Enable Realtime Database (choose your preferred location)
+- IntelliJ IDEA
+- Visual Studio Code
+- Git
+- GitHub
+- Java JDK 21
 
-2. **Get Database URL**
-   - In Firebase Console, go to Realtime Database
-   - Copy your database URL (format: `https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com/`)
+---
 
-3. **Download Service Account Key**
-   - Go to Project Settings → Service Accounts
-   - Click "Generate new private key"
-   - Save the JSON file securely
+# 🏗️ System Architecture
 
-4. **Update Configuration**
-   Update the following in `src/main/resources/application.properties`:
-
-   ```properties
-   # Firebase Configuration
-   firebase.database.url=https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com/
-   firebase.service.account.path=/path/to/your/serviceAccountKey.json
-   ```
-
-   **Note**: You can also set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable instead of specifying the path in properties.
-
-5. **Set Database Rules** (Optional for development)
-   In Firebase Console → Realtime Database → Rules, you can set:
-   ```json
-   {
-     "rules": {
-       "AttendanceSystem": {
-         ".read": true,
-         ".write": true
-       }
-     }
-   }
-   ```
-   **Warning**: These rules allow full access. For production, implement proper security rules.
-
-## Installation and Setup
-
-### Prerequisites
-- Java 17 or higher
-- Maven 3.6 or higher
-- Firebase account and project
-- IDE (IntelliJ IDEA, Eclipse, or VS Code)
-
-### Steps
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd AttendanceSystem
-   ```
-
-2. **Set up Firebase**
-   - Create a Firebase project (see [Firebase Setup](#firebase-setup) section above)
-   - Download your service account JSON file
-   - Update `application.properties` with your Firebase database URL
-   - Set the service account path or `GOOGLE_APPLICATION_CREDENTIALS` environment variable
-
-3. **Build the project**
-   ```bash
-   mvn clean install
-   ```
-
-4. **Run the application**
-   ```bash
-   mvn spring-boot:run
-   ```
-
-5. **Access the application**
-   - Open browser and navigate to `http://localhost:8080`
-   - Default admin credentials: `admin` / `Admin@123`
-   - The default admin user will be created automatically on first run
-
-## Usage Guide
-
-### Default Admin Account
-- **Username**: `admin`
-- **Password**: `Admin@123`
-- **Role**: Administrator
-
-### Admin Functions
-1. **Dashboard**: View statistics (teachers, students, subjects, classes)
-2. **Add Teacher**: Create new teacher accounts
-3. **Add Subject**: Create subjects with unique codes
-4. **Add Class**: Create class entities
-
-### Teacher Functions
-1. **Dashboard**: View assigned subjects and pending students
-2. **Approve Students**: Approve registered student accounts
-3. **Add Subject**: Create subjects with unique codes
-4. **View Attendance**: Monitor student attendance records
-
-### Student Functions
-1. **Registration**: Self-register on the website
-2. **Dashboard**: View available subjects and attendance history
-3. **Mark Attendance**: Use subject codes to mark attendance with location
-4. **View Attendance**: Check personal attendance records
-
-## Project Structure
-
+```text
+                         ┌───────────────────┐
+                         │      ADMIN        │
+                         └─────────┬─────────┘
+                                   │
+                                   │
+                         ┌─────────▼─────────┐
+                         │   Spring Boot     │
+                         │    Application    │
+                         └─────────┬─────────┘
+                                   │
+                 ┌─────────────────┼─────────────────┐
+                 │                 │                 │
+                 ▼                 ▼                 ▼
+        ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+        │    Teacher   │   │    Student   │   │ Email Service│
+        └──────┬───────┘   └──────┬───────┘   └──────────────┘
+               │                  │
+               │ Generate QR      │ Scan QR
+               │                  │
+               └────────┬─────────┘
+                        ▼
+                ┌───────────────┐
+                │   Attendance  │
+                │    Service    │
+                └───────┬───────┘
+                        │
+                        ▼
+              ┌─────────────────────┐
+              │ Firebase Realtime   │
+              │     Database        │
+              └─────────────────────┘
 ```
+
+---
+
+# 🔄 QR Attendance Workflow
+
+```text
+Teacher Login
+     │
+     ▼
+Select Subject
+     │
+     ▼
+Generate QR Code
+     │
+     ▼
+Attendance Token Created
+     │
+     ▼
+Student Scans QR
+     │
+     ▼
+Token Validation
+     │
+     ├── Invalid / Expired
+     │        │
+     │        ▼
+     │   Attendance Rejected
+     │
+     └── Valid
+          │
+          ▼
+     Location Information
+          │
+          ▼
+     Attendance Recorded
+          │
+          ▼
+     Firebase Database
+```
+
+---
+
+# 📦 Main System Modules
+
+The application consists of the following major modules:
+
+1. **Login & Authentication Module**
+2. **Student Management Module**
+3. **Teacher Management Module**
+4. **QR Code Generation Module**
+5. **Attendance Management Module**
+6. **Email Generation Module**
+7. **Notification Module**
+8. **Report Generation Module**
+9. **Data Visualization Module**
+
+---
+
+# 👥 Roles and Access Control
+
+| Role | Main Responsibilities |
+|------|------------------------|
+| **Admin** | Manage teachers, subjects, classes and system information |
+| **Teacher** | Manage subjects, approve students, generate QR codes and monitor attendance |
+| **Student** | Register, scan QR codes, mark attendance and view attendance history |
+
+---
+
+# 📂 Project Structure
+
+```text
 src/
 ├── main/
 │   ├── java/com/attendance/
 │   │   ├── AttendanceManagementApplication.java
+│   │   │
 │   │   ├── config/
 │   │   │   ├── DataInitializer.java
 │   │   │   ├── FirebaseConfig.java
 │   │   │   └── SecurityConfig.java
+│   │   │
 │   │   ├── controller/
 │   │   │   ├── AdminController.java
 │   │   │   ├── HomeController.java
 │   │   │   ├── StudentController.java
 │   │   │   └── TeacherController.java
+│   │   │
 │   │   ├── entity/
 │   │   │   ├── Attendance.java
 │   │   │   ├── AttendanceToken.java
 │   │   │   ├── ClassEntity.java
 │   │   │   ├── Subject.java
 │   │   │   └── User.java
+│   │   │
 │   │   └── service/
 │   │       ├── AttendanceService.java
 │   │       ├── AttendanceTokenService.java
@@ -177,161 +272,556 @@ src/
 │   │       ├── FirebaseUserService.java
 │   │       ├── SubjectService.java
 │   │       └── UserService.java
+│   │
 │   └── resources/
 │       ├── application.properties
+│       ├── static/
 │       └── templates/
 │           ├── login.html
 │           ├── register.html
+│           │
 │           ├── admin/
 │           │   ├── dashboard.html
 │           │   ├── add-class.html
 │           │   ├── add-subject.html
 │           │   └── add-teacher.html
+│           │
 │           ├── teacher/
 │           │   ├── dashboard.html
 │           │   ├── add-subject.html
 │           │   ├── subject-qr.html
 │           │   └── view-attendance.html
+│           │
 │           └── student/
 │               ├── dashboard.html
 │               ├── mark-attendance.html
 │               ├── mark-attendance-qr.html
 │               ├── pending.html
 │               └── view-attendance.html
-└── pom.xml
+│
+├── .env.example
+├── .gitignore
+├── pom.xml
+├── mvnw
+├── mvnw.cmd
+└── README.md
 ```
 
-## Firebase Database Structure
+---
 
-The application uses Firebase Realtime Database with the following structure:
+# 🔥 Firebase Configuration
 
+The application uses **Firebase Realtime Database** for storing application data.
+
+## Prerequisites
+
+Before running the application:
+
+1. Create a Firebase project.
+2. Enable Firebase Realtime Database.
+3. Obtain your Firebase Realtime Database URL.
+4. Generate a Firebase Admin SDK service-account key.
+5. Keep the service-account JSON file securely on your local machine.
+
+---
+
+## 🔐 Environment Configuration
+
+This project uses environment variables for sensitive configuration.
+
+The repository contains:
+
+```text
+.env.example
 ```
+
+as a safe configuration template.
+
+Create your own local:
+
+```text
+.env
+```
+
+file.
+
+Example:
+
+```env
+FIREBASE_DATABASE_URL=
+FIREBASE_SERVICE_ACCOUNT_PATH=
+ADMIN_USERNAME=
+ADMIN_PASSWORD=
+MAIL_USERNAME=
+MAIL_PASSWORD=
+```
+
+Fill in the values locally.
+
+### Environment Variables
+
+| Variable | Purpose |
+|---|---|
+| `FIREBASE_DATABASE_URL` | Firebase Realtime Database URL |
+| `FIREBASE_SERVICE_ACCOUNT_PATH` | Local path to Firebase Admin SDK JSON |
+| `ADMIN_USERNAME` | Application admin username |
+| `ADMIN_PASSWORD` | Application admin password |
+| `MAIL_USERNAME` | Gmail account used for SMTP |
+| `MAIL_PASSWORD` | Gmail App Password used for SMTP |
+
+> **Never commit `.env` to GitHub.**
+
+> **Never commit the Firebase service-account JSON file to GitHub.**
+
+---
+
+# 🔒 Secret Management
+
+Sensitive configuration is intentionally kept outside the Git repository.
+
+The following files are excluded through `.gitignore`:
+
+```text
+.env
+*.json
+target/
+.idea/
+.vscode/
+.claude/
+```
+
+The repository contains only the safe configuration references.
+
+For example:
+
+```properties
+firebase.database.url=${FIREBASE_DATABASE_URL}
+firebase.service.account.path=${FIREBASE_SERVICE_ACCOUNT_PATH}
+
+spring.security.user.name=${ADMIN_USERNAME}
+spring.security.user.password=${ADMIN_PASSWORD}
+
+spring.mail.username=${MAIL_USERNAME}
+spring.mail.password=${MAIL_PASSWORD}
+```
+
+This allows the same codebase to be used across different environments without storing credentials in source code.
+
+---
+
+# 📥 Installation and Setup
+
+## Prerequisites
+
+Install:
+
+- Java JDK 21
+- Git
+- Firebase project
+- Firebase Realtime Database
+- Firebase Admin SDK service-account JSON
+- Internet connection
+
+Maven does not need to be installed separately because the project includes the Maven Wrapper.
+
+---
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/akash274545/Smart-Attendance-Marking-System-Deploy.git
+```
+
+Move into the project:
+
+```bash
+cd Smart-Attendance-Marking-System-Deploy
+```
+
+---
+
+## 2. Create `.env`
+
+Copy the structure from:
+
+```text
+.env.example
+```
+
+Create:
+
+```text
+.env
+```
+
+and configure your own values.
+
+---
+
+## 3. Configure Firebase
+
+Place your Firebase service-account JSON file on your local machine.
+
+Then configure:
+
+```env
+FIREBASE_SERVICE_ACCOUNT_PATH=
+```
+
+with the appropriate local path.
+
+Example:
+
+```env
+FIREBASE_SERVICE_ACCOUNT_PATH=path/to/firebase-service-account.json
+```
+
+Do not commit this JSON file.
+
+---
+
+## 4. Build the Project
+
+Using Maven Wrapper on Windows:
+
+```powershell
+.\mvnw.cmd clean package
+```
+
+---
+
+## 5. Run the Application
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+The application uses port:
+
+```text
+8080
+```
+
+Open:
+
+```text
+http://localhost:8080
+```
+
+---
+
+# 🌐 Application Access
+
+After successfully starting the application, open:
+
+```text
+http://localhost:8080
+```
+
+The application provides separate authentication and dashboards for:
+
+- Admin
+- Teacher
+- Student
+
+Actual credentials are configured through environment variables and should not be stored in this README.
+
+---
+
+# 🧑‍💼 Admin Functions
+
+The Admin dashboard provides functionality such as:
+
+- View system statistics
+- Manage teachers
+- Manage subjects
+- Manage classes
+- Manage system information
+
+---
+
+# 👨‍🏫 Teacher Functions
+
+Teachers can:
+
+1. Log in to the system.
+2. Create subjects.
+3. Manage subject information.
+4. Approve registered students.
+5. Generate QR codes.
+6. Monitor attendance.
+7. View attendance records.
+
+---
+
+# 👨‍🎓 Student Functions
+
+Students can:
+
+1. Register through the application.
+2. Log in after approval.
+3. View available subjects.
+4. Mark attendance using subject codes.
+5. Scan QR codes to mark attendance.
+6. Provide location information where supported.
+7. View attendance history.
+
+---
+
+# 🗄️ Firebase Database Structure
+
+The application uses Firebase Realtime Database with a structure similar to:
+
+```text
 AttendanceSystem/
+│
 ├── users/
 │   └── {userId}/
-│       ├── id: String
-│       ├── username: String
-│       ├── password: String (BCrypt hashed)
-│       ├── email: String
-│       ├── fullName: String
-│       ├── roleId: Integer (0=Admin, 1=Teacher, 2=Student)
-│       ├── isApproved: Boolean
-│       └── createdAt: String
+│       ├── id
+│       ├── username
+│       ├── password
+│       ├── email
+│       ├── fullName
+│       ├── roleId
+│       ├── isApproved
+│       └── createdAt
+│
 ├── classes/
 │   └── {classId}/
-│       ├── id: String
-│       ├── className: String
-│       ├── classCode: String
-│       ├── description: String
-│       └── createdAt: String
+│       ├── id
+│       ├── className
+│       ├── classCode
+│       ├── description
+│       └── createdAt
+│
 ├── subjects/
 │   └── {subjectId}/
-│       ├── id: String
-│       ├── subjectName: String
-│       ├── subjectCode: String
-│       ├── description: String
-│       ├── teacherId: String (reference to user)
-│       └── createdAt: String
+│       ├── id
+│       ├── subjectName
+│       ├── subjectCode
+│       ├── description
+│       ├── teacherId
+│       └── createdAt
+│
 ├── attendance/
 │   └── {attendanceId}/
-│       ├── id: String
-│       ├── studentId: String (reference to user)
-│       ├── subjectId: String (reference to subject)
-│       ├── attendanceDate: String
-│       ├── latitude: Double
-│       ├── longitude: Double
-│       ├── locationAddress: String
-│       ├── status: String (PRESENT, ABSENT, LATE)
-│       ├── remarks: String
-│       └── createdAt: String
+│       ├── id
+│       ├── studentId
+│       ├── subjectId
+│       ├── attendanceDate
+│       ├── latitude
+│       ├── longitude
+│       ├── locationAddress
+│       ├── status
+│       ├── remarks
+│       └── createdAt
+│
 └── attendanceTokens/
     └── {tokenId}/
-        ├── id: String
-        ├── token: String
-        ├── subjectId: String (reference to subject)
-        ├── teacherId: String (reference to user)
-        ├── expiresAt: String
-        ├── createdAt: String
-        └── isActive: Boolean
+        ├── id
+        ├── token
+        ├── subjectId
+        ├── teacherId
+        ├── expiresAt
+        ├── createdAt
+        └── isActive
 ```
 
-**Note**: All data is automatically created and managed by the application. No manual database setup is required.
+---
 
-## Security Features
+# 🔐 Security Features
 
-- **Password Encryption**: BCrypt password hashing
-- **Role-based Access**: Different access levels for Admin, Teacher, Student
-- **Session Management**: Secure login/logout functionality
-- **CSRF Protection**: Disabled for development (enable for production)
+The application includes:
 
-## Location Tracking
+- Spring Security authentication
+- Role-based access control
+- BCrypt password hashing
+- Secure session management
+- QR attendance tokens
+- Time-limited attendance tokens
+- Environment-variable based credentials
+- Firebase Admin SDK authentication
+- Sensitive files excluded from Git
+- Separate configuration for local/deployment environments
 
-The system includes basic location tracking for attendance:
-- Students can mark attendance with GPS coordinates
-- Location address can be manually entered
-- Coordinates are stored for verification purposes
+> For production deployment, Firebase Database Rules and application security settings should be reviewed and configured appropriately.
 
-## Development Notes
+---
 
-- **Firebase Integration**: Uses Firebase Realtime Database for all data persistence
-- **NoSQL Structure**: Data stored as JSON documents in Firebase
-- **Default Admin**: Created automatically on first run (username: `admin`, password: `Admin@123`)
-- **Student Approval**: Required before students can mark attendance
-- **Subject Codes**: Unique codes shared by teachers for attendance marking
-- **QR Code Support**: Teachers can generate QR codes for quick attendance marking
-- **Real-time Updates**: Firebase provides real-time synchronization capabilities
+# 📍 Location Tracking
 
-## Troubleshooting
+The system supports basic location information for attendance.
 
-### Common Issues
+Attendance records may contain:
 
-1. **Firebase Connection Error**
-   - Verify Firebase database URL is correct in `application.properties`
-   - Check that your Firebase project has Realtime Database enabled
-   - Ensure service account JSON file path is correct or `GOOGLE_APPLICATION_CREDENTIALS` is set
-   - Verify Firebase service account has proper permissions
+```text
+Latitude
+Longitude
+Location Address
+```
 
-2. **Authentication Issues**
-   - Ensure Firebase service account JSON file is valid
-   - Check that the service account has "Firebase Realtime Database Admin" role
-   - Verify `GOOGLE_APPLICATION_CREDENTIALS` environment variable if not using file path
+This information can be used to provide additional verification for attendance records.
 
-3. **Database Rules Error**
-   - Check Firebase Realtime Database rules in Firebase Console
-   - For development, you may need to allow read/write access
-   - For production, implement proper security rules based on authentication
+---
 
-4. **Port Already in Use**
-   - Change port in `application.properties`: `server.port=8081`
+# 📧 Email Service
 
-5. **Login Issues**
-   - Use default admin credentials: `admin` / `Admin@123`
-   - Check if user account is approved (for students)
-   - Verify Firebase connection is working (check application logs)
+The application supports Gmail SMTP for email functionality.
 
-6. **Data Not Persisting**
-   - Check Firebase Console to verify data is being written
-   - Review application logs for Firebase errors
-   - Verify database rules allow write operations
+SMTP configuration is supplied through environment variables:
 
-## Firebase Benefits
+```env
+MAIL_USERNAME=
+MAIL_PASSWORD=
+```
 
-- **NoSQL Flexibility**: Easy to add new fields without schema migrations
-- **Real-time Sync**: Automatic synchronization across clients
-- **Scalability**: Firebase handles scaling automatically
-- **Cloud-based**: No local database setup required
-- **Security**: Built-in authentication and security rules
+The Gmail App Password should be stored securely and should never be committed to GitHub.
 
-## Future Enhancements
+---
 
-- Email notifications for student approval
-- Advanced reporting and analytics
-- Mobile app integration with Firebase SDK
-- Real-time attendance monitoring dashboard
-- Push notifications for attendance reminders
-- Integration with external calendar systems
-- Firebase Authentication integration for enhanced security
+# 🧪 Testing Checklist
 
-## License
+Before deployment, verify:
+
+- [ ] Admin login works
+- [ ] Teacher login works
+- [ ] Student registration works
+- [ ] Student approval works
+- [ ] Subject creation works
+- [ ] QR generation works
+- [ ] QR attendance works
+- [ ] Manual attendance works
+- [ ] Location information works
+- [ ] Attendance records are saved to Firebase
+- [ ] Attendance records can be viewed
+- [ ] Email functionality works
+- [ ] `.env` is not tracked by Git
+- [ ] Firebase JSON is not tracked by Git
+- [ ] No credentials are present in source code
+
+---
+
+# 🛠️ Troubleshooting
+
+## Firebase Connection Error
+
+Check:
+
+- Firebase Realtime Database is enabled.
+- `FIREBASE_DATABASE_URL` is correct.
+- `FIREBASE_SERVICE_ACCOUNT_PATH` points to a valid JSON file.
+- The Firebase service-account credentials are valid.
+- The application has permission to access the database.
+
+---
+
+## Authentication Problems
+
+Check:
+
+- `ADMIN_USERNAME` is configured.
+- `ADMIN_PASSWORD` is configured.
+- Firebase is accessible.
+- The application started without configuration errors.
+
+---
+
+## Port 8080 Already in Use
+
+If port 8080 is already being used, stop the application/process using the port or run the application on another port.
+
+For example:
+
+```powershell
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--server.port=8081"
+```
+
+Then open:
+
+```text
+http://localhost:8081
+```
+
+---
+
+## Data Not Appearing in Firebase
+
+Check:
+
+1. Firebase URL.
+2. Service-account JSON.
+3. Firebase permissions.
+4. Application logs.
+5. Firebase Realtime Database configuration.
+
+---
+
+# ☁️ Deployment
+
+The project is structured so that sensitive configuration can be supplied separately from the source code.
+
+For deployment, configure the required environment variables on the hosting platform:
+
+```text
+FIREBASE_DATABASE_URL
+FIREBASE_SERVICE_ACCOUNT_PATH
+ADMIN_USERNAME
+ADMIN_PASSWORD
+MAIL_USERNAME
+MAIL_PASSWORD
+```
+
+The exact Firebase service-account configuration depends on the hosting platform.
+
+> Never upload secrets to GitHub simply because a deployment platform requires them. Configure secrets through the platform's environment/secret management system whenever supported.
+
+---
+
+# 🔮 Future Enhancements
+
+Possible future improvements include:
+
+- Advanced attendance analytics
+- Real-time attendance monitoring
+- Mobile application
+- Push notifications
+- Advanced reporting
+- Improved notification system
+- Face-recognition based attendance
+- Firebase Authentication integration
+- External calendar integration
+- Multi-college support
+- More advanced attendance verification
+
+---
+
+# 📈 Firebase Benefits
+
+The project uses Firebase Realtime Database because it provides:
+
+- NoSQL data storage
+- Real-time synchronization
+- Cloud-based database
+- Flexible data structure
+- Scalable infrastructure
+- Firebase security capabilities
+
+---
+
+# 👨‍💻 Developer
+
+**Akash Narayankar**
+
+GitHub:
+
+https://github.com/akash274545
+
+Project Repository:
+
+https://github.com/akash274545/Smart-Attendance-Marking-System-Deploy
+
+---
+
+# 📄 License
 
 This project is created for educational and development purposes.
