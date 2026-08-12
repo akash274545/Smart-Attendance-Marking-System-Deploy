@@ -6,6 +6,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,10 @@ public class EmailService {
     
     @Autowired(required = false)
     private JavaMailSender mailSender;
-    
+
+    @Value("${spring.mail.username}")
+    private String mailUsername;
+
     public void sendTeacherCredentials(String email, String username, String password, String fullName) {
         if (mailSender == null) {
             System.out.println("Email service not configured. Please configure SMTP settings in application.properties");
@@ -98,7 +102,7 @@ public class EmailService {
             MimeMessage mime = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mime, true, "UTF-8");
             helper.setTo(toEmails.toArray(new String[0]));
-            helper.setFrom("${MAIL_USERNAME}");
+            helper.setFrom(mailUsername);
             helper.setSubject("Monthly Attendance Report — " + monthYear);
             helper.setText(buildReportHtml(studentName, monthYear, rows), true);
             mailSender.send(mime);
