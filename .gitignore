@@ -1,0 +1,24 @@
+# Firebase credentials
+*.json
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Claude local settings
+.claude/
+
+# Maven build files
+target/
+
+# OS files
+.DS_Store
+Thumbs.db
