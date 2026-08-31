@@ -206,6 +206,87 @@ Token Validation
      Firebase Database
 ```
 
+
+---
+
+# 📱 Optional React QR Scanner
+
+The main **Smart-Attendance-Marking-System** already provides QR-based attendance functionality through the student interface. Students can access the QR scanning feature directly from the main application.
+
+A separate React-based QR Scanner application is also available as an **optional companion project** for students who prefer a dedicated QR scanning interface.
+
+### 🔗 Companion Project
+
+**Repository:** `student-qr-scan`
+
+**GitHub:** https://github.com/akash274545/student-qr-scan
+
+The React QR Scanner is designed specifically for:
+
+- Student-side QR code scanning
+- Camera-based QR code detection
+- Dedicated QR scanning interface
+- Connecting the scanned attendance token with the attendance system
+
+### 💡 Why is the React QR Scanner separate?
+
+The React QR Scanner was developed as a separate client application during the development and testing phase when the main Spring Boot application was running locally.
+
+The architecture can therefore be used in two ways:
+
+**Option 1 — Main Application**
+
+Students can use the QR scanning functionality available directly inside the main **Smart-Attendance-Marking-System**.
+
+```text
+Student Login
+      ↓
+Student QR Scanner
+      ↓
+Camera Access
+      ↓
+Scan Teacher's QR Code
+      ↓
+Token Validation
+      ↓
+Attendance Marked
+
+```
+**Option 2 — Dedicated React Scanner**
+
+Students can use the separate **student-qr-scan** React application as a dedicated QR scanning interface.
+```text
+Teacher
+   ↓
+Generate QR
+   ↓
+Attendance Token
+   ↓
+Student
+   ↓
+React QR Scanner
+   ↓
+Scan QR
+   ↓
+Attendance System
+   ↓
+Attendance Marked
+
+```
+📌 Important
+
+The Smart-Attendance-Marking-System is the complete attendance management application containing the Admin, Teacher, and Student modules, attendance management, QR token generation and validation, location verification, Firebase integration, reports, and email functionality.
+
+The student-qr-scan project is an **optional companion application** and is not required when using the QR scanning functionality available in the main application.
+
+
+🔗 Related Repository
+
+The dedicated React QR Scanner source code is available here:
+
+student-qr-scan:
+https://github.com/akash274545/student-qr-scan
+
 ---
 
 # 📦 Main System Modules
