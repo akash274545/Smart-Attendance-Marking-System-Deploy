@@ -904,5 +904,6 @@ https://github.com/akash274545/Smart-Attendance-Marking-System-Deploy
 ---
 
 # 📄 License
+This project is licensed under the MIT License.
 
-This project is created for educational and development purposes.
+See the [LICENSE](LICENSE) file for details.
