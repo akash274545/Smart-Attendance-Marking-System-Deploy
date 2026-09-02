@@ -888,6 +888,12 @@ The project uses Firebase Realtime Database because it provides:
 - Firebase security capabilities
 
 ---
+## 📄 Final Year Project Report
+
+The complete **Final Year Project Report** has been added to this repository for detailed documentation of the project.
+
+[📥 View Full Project Report](./docs/04_Final_Report.pdf)
+---
 
 # 👨‍💻 Developer
 
